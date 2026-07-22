@@ -19,12 +19,19 @@ not a single printable part.
 ## Case
 
 - `Minilite64_case_full.*` — one-piece case for a printer or machine with a
-  build area larger than the Bambu A1.  Overall envelope is approximately
-  293.75 x 109.25 x 27.5 mm.
+  build area larger than the Bambu A1.  It uses a strict GH60-style 295 x
+  105 mm rectangular plan, R5 plan corners, and a 6 degree wedge.  The front
+  height is 20 mm and the rear height is 31.036 mm.  There is no controller
+  tongue or rear projection.
 - `Minilite64_case_A1_left.*` — left half of the Bambu A1 printable case.
 - `Minilite64_case_A1_right.*` — right half of the Bambu A1 printable case.
 - `Minilite64_case_joiner_print_2x.*` — bottom joining strap; print two copies
   to connect the A1 left/right case halves.
+
+The RP2040 carrier, service cover, USB-C tunnel, and R6 FFC corridor are custom
+internal features.  They do not change the canonical GH60 outside envelope.
+The PCB/plate stack and its five mounting axes follow the 6 degree typing
+plane; the carrier remains horizontal at the bottom for service access.
 
 ## Controller service part
 
@@ -47,4 +54,3 @@ The original root-level `plate.dxf` is preserved for provenance.  Do not send
 it to manufacturing: it contains an obsolete screw relief merged into the
 bottom-row Menu switch opening.  The files in this directory remove that
 collision while retaining the three round mounts and two side mounting slots.
-

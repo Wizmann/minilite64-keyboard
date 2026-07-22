@@ -29,37 +29,37 @@
     },
     "case_full": {
       "valid": true,
-      "volume_mm3": 141536.04,
+      "volume_mm3": 144908.463,
       "bounds_mm": [
-        293.75,
-        109.25,
-        27.5
+        295.0,
+        105.0,
+        31.036
       ]
     },
     "case_left": {
       "valid": true,
-      "volume_mm3": 70865.247,
+      "volume_mm3": 72481.309,
       "bounds_mm": [
-        146.875,
-        109.25,
-        27.5
+        147.5,
+        105.0,
+        31.036
       ]
     },
     "case_right": {
       "valid": true,
-      "volume_mm3": 70319.358,
+      "volume_mm3": 72075.72,
       "bounds_mm": [
-        146.875,
-        109.25,
-        27.5
+        147.5,
+        105.0,
+        31.036
       ]
     },
     "service_cover": {
       "valid": true,
-      "volume_mm3": 3940.895,
+      "volume_mm3": 3828.484,
       "bounds_mm": [
         53.65,
-        40.8,
+        39.8,
         8.0
       ]
     },
@@ -83,17 +83,24 @@
     }
   },
   "assembly": {
-    "main_pcb_bottom_z_mm": 18.0,
-    "plate_bottom_z_mm": 24.6,
-    "case_top_z_mm": 27.5,
+    "main_pcb_bottom_z_mm": 20.8,
+    "plate_bottom_z_mm": 27.400000000000002,
+    "case_typing_angle_deg": 6.0,
+    "case_front_height_mm": 20.0,
+    "case_rear_height_mm": 31.036,
+    "case_external_plan_mm": [
+      295.0,
+      105.0
+    ],
+    "case_plan_corner_radius_mm": 5.0,
     "ffc_minimum_bend_radius_mm": 6.0,
     "reserved_ffc_corridor_mm": [
       132.6,
-      -6.0,
+      -0.2,
       153.15,
-      45.0,
+      35.5,
       3.0,
-      16.2
+      22.0
     ],
     "main_component_to_mount_boss_intersection_mm3": 0.0,
     "main_component_to_controller_intersection_mm3": 0.0,
@@ -105,7 +112,8 @@
     "ffc_corridor_to_case_intersection_mm3": 0.0,
     "ffc_corridor_to_mount_boss_intersection_mm3": 0.0,
     "minimum_keycap_to_inner_wall_xy_clearance_mm": 0.7,
-    "wall_top_to_keycap_skirt_vertical_clearance_mm": 1.6,
+    "wall_top_to_keycap_skirt_vertical_clearance_mm": 1.5,
+    "controller_bay_inside_gh60_footprint": true,
     "bottom_row_conflicting_screw_relief_removed": true,
     "round_main_mounts": [
       [
@@ -134,19 +142,19 @@
     "carrier_mounts": [
       [
         125.875,
-        -4.3
+        2.0
       ],
       [
         159.875,
-        -4.3
+        2.0
       ],
       [
         125.875,
-        25.7
+        32.0
       ],
       [
         159.875,
-        25.7
+        32.0
       ]
     ]
   }

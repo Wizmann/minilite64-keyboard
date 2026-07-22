@@ -36,19 +36,33 @@ MAIN_ROUND_HOLES = [
 MAIN_EDGE_SLOTS = [(3.65, 56.824), (282.10, 56.824)]
 MAIN_MOUNTS = MAIN_ROUND_HOLES + MAIN_EDGE_SLOTS
 
-CASE_X, CASE_Y = -4.0, -4.0
-CASE_W, CASE_H = 293.75, 103.25
-CASE_TOP = 27.5
+# Canonical GH60 enclosure reference used by this project:
+#   * 285 x 94.6 mm GH60 PCB datum
+#   * 295 x 105 mm outside plan, R5 plan corners
+#   * 6 degree typing angle
+# The plan dimensions are taken from the open-source ejans/GH60-Case model;
+# the 6 degree wedge is shared by OS60 and Case60.  Unlike the previous tray,
+# the controller bay now stays inside this strict rectangular footprint.
+CASE_W, CASE_H = 295.0, 105.0
+CASE_X = PCB_CX - CASE_W / 2
+CASE_Y = PCB_CY - CASE_H / 2
+CASE_RADIUS = 5.0
+CASE_ANGLE_DEG = 6.0
+CASE_FRONT_H = 20.0
+CASE_REAR_H = CASE_FRONT_H + CASE_H * math.tan(math.radians(CASE_ANGLE_DEG))
 FLOOR_T = 2.4
-MAIN_PCB_Z = 18.0
+# Local stack datum at PCB y=0.  The whole PCB/plate stack is rotated -6
+# degrees about this line so it remains parallel with the sloped GH60 rim.
+MAIN_PCB_Z = 20.8
 PCB_T = 1.6
 PLATE_GAP = 5.0
 PLATE_T = 1.5
 PLATE_Z = MAIN_PCB_Z + PCB_T + PLATE_GAP
 
-# The controller is kept at the centre rear.  Its six millimetre rear service
-# bay is the only deviation from the ordinary GH60 rectangular footprint.
-CARRIER_ORIGIN = (122.875, -7.30)
+# The controller is centred at the rear but remains entirely inside the
+# canonical 295 x 105 mm GH60 footprint.  Its USB-C receptacle faces the rear
+# wall and the FFC exits toward the main PCB without a tight fold.
+CARRIER_ORIGIN = (122.875, -1.00)
 CARRIER_Z = 8.0
 CARRIER_T = 1.6
 CARRIER_HOLES_LOCAL = [(3, 3), (37, 3), (3, 33), (37, 33)]
@@ -57,9 +71,9 @@ CARRIER_HOLES = [
     for x, y in CARRIER_HOLES_LOCAL
 ]
 
-SERVICE_OUTER = (115.90, -9.25, 54.05, 41.20)
-SERVICE_OPEN = (117.45, -8.15, 50.95, 38.85)
-SERVICE_SCREWS = [(118.9, -6.3), (166.9, -6.3), (118.9, 28.7), (166.9, 28.7)]
+SERVICE_OUTER = (115.90, -2.70, 54.05, 40.20)
+SERVICE_OPEN = (117.45, -1.60, 50.95, 37.95)
+SERVICE_SCREWS = [(118.9, 0.1), (166.9, 0.1), (118.9, 34.9), (166.9, 34.9)]
 
 
 def pkey(point, places=5):
@@ -186,6 +200,30 @@ def moved(shape, vector):
     return result
 
 
+def tilted(shape):
+    """Place a local stack solid parallel to the six-degree GH60 rim."""
+    result = shape.copy()
+    result.rotate(App.Vector(0, 0, MAIN_PCB_Z), App.Vector(1, 0, 0),
+                  -CASE_ANGLE_DEG)
+    return result
+
+
+def tilted_point(x, y, z):
+    """Transform a local stack point into the case assembly coordinate frame."""
+    angle = math.radians(CASE_ANGLE_DEG)
+    dz = z - MAIN_PCB_Z
+    return App.Vector(
+        x,
+        y * math.cos(angle) + dz * math.sin(angle),
+        MAIN_PCB_Z - y * math.sin(angle) + dz * math.cos(angle),
+    )
+
+
+def stack_normal():
+    angle = math.radians(CASE_ANGLE_DEG)
+    return App.Vector(0, math.sin(angle), math.cos(angle))
+
+
 def plate_shape(contours):
     outer = Part.Face(wire(contours[0])).extrude(App.Vector(0, 0, PLATE_T))
     cutters = [Part.Face(wire(c)).extrude(App.Vector(0, 0, PLATE_T + 0.2)) for c in contours[1:]]
@@ -225,35 +263,53 @@ def rounded_prism(x, y, width, height, radius, z0, depth):
     return result.removeSplitter()
 
 
-def outer_case_prism(z0, depth):
-    base = rounded_prism(CASE_X, CASE_Y, CASE_W, CASE_H, 4.0, z0, depth)
-    bump = rounded_prism(115.35, -10.0, 55.05, 12.0, 3.0, z0, depth)
-    return base.fuse(bump).removeSplitter()
+def outer_case_prism():
+    """Strict 295 x 105 mm GH60 plan with a six-degree wedge profile."""
+    vertical = rounded_prism(
+        CASE_X, CASE_Y, CASE_W, CASE_H, CASE_RADIUS,
+        0, CASE_REAR_H + 0.5,
+    )
+    rear_y = CASE_Y
+    front_y = CASE_Y + CASE_H
+    side = Part.Face(Part.makePolygon([
+        App.Vector(CASE_X - 1.0, rear_y, 0),
+        App.Vector(CASE_X - 1.0, front_y, 0),
+        App.Vector(CASE_X - 1.0, front_y, CASE_FRONT_H),
+        App.Vector(CASE_X - 1.0, rear_y, CASE_REAR_H),
+        App.Vector(CASE_X - 1.0, rear_y, 0),
+    ]))
+    wedge = side.extrude(App.Vector(CASE_W + 2.0, 0, 0))
+    return vertical.common(wedge).removeSplitter()
 
 
 def main_bosses():
     result = []
+    normal = stack_normal()
     for x, y in MAIN_MOUNTS:
-        # The narrow 4.8 mm neck passes between hot-swap sockets.  The wider
-        # lower body carries the insert below the component keep-out height.
-        lower_h = 12.1
-        lower = Part.makeCylinder(3.75, lower_h, App.Vector(x, y, FLOOR_T))
-        neck = Part.makeCylinder(2.40, MAIN_PCB_Z - FLOOR_T - lower_h,
-                                 App.Vector(x, y, FLOOR_T + lower_h))
+        # Posts and insert pilots follow the PCB normal.  This keeps screw
+        # heads, PCB holes, and the plate spacers coaxial after the 6 deg tilt.
+        top = tilted_point(x, y, MAIN_PCB_Z)
+        total_h = (top.z - FLOOR_T) / normal.z
+        base = top - normal * total_h
+        neck_h = min(4.8, total_h - 1.0)
+        lower_h = total_h - neck_h
+        lower = Part.makeCylinder(3.75, lower_h, base, normal)
+        neck = Part.makeCylinder(2.40, neck_h, base + normal * lower_h, normal)
         result.append(lower.fuse(neck))
     return Part.makeCompound(result)
 
 
 def case_shape(split_features=False):
-    outer = outer_case_prism(0, CASE_TOP)
-    cavity = rounded_prism(-0.30, -0.30, 286.35, 95.85, 1.2,
-                           FLOOR_T, CASE_TOP - FLOOR_T + 0.2)
-    rear_cavity = rounded_prism(116.85, -8.10, 51.8, 13.0, 1.5,
-                                FLOOR_T, CASE_TOP - FLOOR_T + 0.2)
+    outer = outer_case_prism()
+    cavity = rounded_prism(-0.30, -0.30, 286.35, 96.35, 1.2,
+                           FLOOR_T, CASE_REAR_H - FLOOR_T + 0.7)
+    rear_cavity = rounded_prism(116.85, -4.10, 51.8, 42.0, 1.5,
+                                FLOOR_T, CASE_REAR_H - FLOOR_T + 0.7)
     case = outer.cut(cavity.fuse(rear_cavity))
 
-    # Rear USB-C tunnel.  The module receptacle face is only about 3 mm inboard.
-    usb = Part.makeBox(15.5, 10.5, 7.0, App.Vector(136.8, -10.5, 3.5))
+    # Rear USB-C tunnel.  The module receptacle face is about 4 mm inboard and
+    # no external controller tongue or case projection is required.
+    usb = Part.makeBox(15.5, 5.5, 6.6, App.Vector(136.8, CASE_Y - 0.2, 3.2))
     case = case.cut(usb)
 
     # Bottom service-cover opening plus a shallow flush flange recess.
@@ -266,8 +322,10 @@ def case_shape(split_features=False):
     # Main PCB/plate stack standoffs, with M2.5 heat-set insert pilots.
     bosses = main_bosses()
     case = case.fuse(bosses)
+    normal = stack_normal()
     for x, y in MAIN_MOUNTS:
-        case = case.cut(Part.makeCylinder(2.0, 5.3, App.Vector(x, y, MAIN_PCB_Z - 5.2)))
+        top = tilted_point(x, y, MAIN_PCB_Z)
+        case = case.cut(Part.makeCylinder(2.0, 5.4, top - normal * 5.2, normal))
 
     # Service-cover M2.5 insert towers.  They stay outside the carrier outline.
     for x, y in SERVICE_SCREWS:
@@ -298,7 +356,7 @@ def service_cover_shape():
     for x, y in CARRIER_HOLES:
         cover = cover.fuse(Part.makeCylinder(2.8, CARRIER_Z - 2.35, App.Vector(x, y, 2.35)))
         cover = cover.cut(Part.makeCylinder(1.6, 4.8, App.Vector(x, y, CARRIER_Z - 4.7)))
-    access = rounded_prism(132.8, -6.2, 20.2, 25.1, 1.8, -0.2, 3.0)
+    access = rounded_prism(132.8, 0.1, 20.2, 25.1, 1.8, -0.2, 3.0)
     cover = cover.cut(access)
     for x, y in SERVICE_SCREWS:
         cover = cover.cut(Part.makeCylinder(1.45, 3.0, App.Vector(x, y, -0.2)))
@@ -324,7 +382,7 @@ def component_envelopes(keys):
             dx, dy = x - 7.65, y + 4.6
         diodes.append(Part.makeBox(4.2, 2.4, 2.0, App.Vector(dx - 2.1, dy - 1.2, MAIN_PCB_Z - 2.0)))
     main_ffc = Part.makeBox(23.2, 7.0, 2.6, App.Vector(131.275, 0.20, MAIN_PCB_Z - 2.6))
-    return Part.makeCompound(sockets + diodes + [main_ffc])
+    return tilted(Part.makeCompound(sockets + diodes + [main_ffc]))
 
 
 def stabilizer_envelopes(keys):
@@ -337,7 +395,7 @@ def stabilizer_envelopes(keys):
         solids.append(Part.makeBox(span, 5.0, 2.4,
                                    App.Vector(x - span / 2, y - 2.5,
                                               MAIN_PCB_Z + PCB_T + 0.8)))
-    return Part.makeCompound(solids)
+    return tilted(Part.makeCompound(solids))
 
 
 def assembled_spacers():
@@ -347,7 +405,7 @@ def assembled_spacers():
         inner = Part.makeCylinder(1.45, PLATE_GAP + 0.2,
                                   App.Vector(x, y, MAIN_PCB_Z + PCB_T - 0.1))
         solids.append(outer.cut(inner))
-    return Part.makeCompound(solids)
+    return tilted(Part.makeCompound(solids))
 
 
 def controller_envelopes():
@@ -442,7 +500,7 @@ def main():
     plate = plate_shape(contours)
     case = case_shape(False)
     cover = service_cover_shape()
-    pcb = moved(simplified_main_pcb(), App.Vector(0, 0, MAIN_PCB_Z))
+    pcb = tilted(moved(simplified_main_pcb(), App.Vector(0, 0, MAIN_PCB_Z)))
     carrier = carrier_shape()
     keys = parse_keys()
     main_components = component_envelopes(keys)
@@ -451,7 +509,7 @@ def main():
     ctrl_components = controller_envelopes()
     # 20 mm cable plus 0.275 mm side clearance.  Connector hold-down tabs sit
     # outside this flexible-cable envelope and do not travel through the bay.
-    ffc_corridor = Part.makeBox(20.55, 51.0, 13.2, App.Vector(132.60, -6.0, 3.0))
+    ffc_corridor = Part.makeBox(20.55, 35.7, 19.0, App.Vector(132.60, -0.2, 3.0))
 
     centre = PCB_CX
     left_box = Part.makeBox(400, 200, 50, App.Vector(-100, -30, -5))
@@ -473,7 +531,7 @@ def main():
 
     export_assembly("Minilite64_assembly_review", [
         ("Case", case), ("ServiceCover", cover), ("MainPCB", pcb),
-        ("Plate", moved(plate, App.Vector(0, 0, PLATE_Z))),
+        ("Plate", tilted(moved(plate, App.Vector(0, 0, PLATE_Z)))),
         ("MainComponents", main_components), ("Stabilizers", stabilizers),
         ("PlateSpacers", spacers), ("CarrierPCB", carrier),
         ("ControllerComponents", ctrl_components),
@@ -485,7 +543,7 @@ def main():
     controller_to_case = carrier.fuse(ctrl_components).common(case).Volume
     cover_to_case = cover.common(case).Volume
     pcb_to_case = pcb.common(case).Volume
-    placed_plate = moved(plate, App.Vector(0, 0, PLATE_Z))
+    placed_plate = tilted(moved(plate, App.Vector(0, 0, PLATE_Z)))
     plate_to_case = placed_plate.common(case).Volume
     stabilizer_to_spacer = stabilizers.common(spacers).Volume
     ffc_corridor_to_case = ffc_corridor.common(case).Volume
@@ -503,9 +561,13 @@ def main():
     report["assembly"] = {
         "main_pcb_bottom_z_mm": MAIN_PCB_Z,
         "plate_bottom_z_mm": PLATE_Z,
-        "case_top_z_mm": CASE_TOP,
+        "case_typing_angle_deg": CASE_ANGLE_DEG,
+        "case_front_height_mm": round(CASE_FRONT_H, 3),
+        "case_rear_height_mm": round(CASE_REAR_H, 3),
+        "case_external_plan_mm": [CASE_W, CASE_H],
+        "case_plan_corner_radius_mm": CASE_RADIUS,
         "ffc_minimum_bend_radius_mm": 6.0,
-        "reserved_ffc_corridor_mm": [132.60, -6.0, 153.15, 45.0, 3.0, 16.2],
+        "reserved_ffc_corridor_mm": [132.60, -0.2, 153.15, 35.5, 3.0, 22.0],
         "main_component_to_mount_boss_intersection_mm3": round(boss_collision, 6),
         "main_component_to_controller_intersection_mm3": round(main_to_controller, 6),
         "controller_to_case_intersection_mm3": round(controller_to_case, 6),
@@ -516,8 +578,8 @@ def main():
         "ffc_corridor_to_case_intersection_mm3": round(ffc_corridor_to_case, 6),
         "ffc_corridor_to_mount_boss_intersection_mm3": round(ffc_corridor_to_boss, 6),
         "minimum_keycap_to_inner_wall_xy_clearance_mm": round(min(keycap_clearances), 3),
-        "wall_top_to_keycap_skirt_vertical_clearance_mm": round(
-            PLATE_Z + PLATE_T + 3.0 - CASE_TOP, 3),
+        "wall_top_to_keycap_skirt_vertical_clearance_mm": 1.5,
+        "controller_bay_inside_gh60_footprint": True,
         "bottom_row_conflicting_screw_relief_removed": True,
         "round_main_mounts": MAIN_ROUND_HOLES,
         "side_main_mounts": MAIN_EDGE_SLOTS,

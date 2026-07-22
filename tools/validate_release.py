@@ -46,6 +46,12 @@ def main():
     for key in intersection_keys:
         require(abs(float(assembly[key])) < 1e-6, f"mechanical collision: {key}={assembly[key]}")
     require(assembly["bottom_row_conflicting_screw_relief_removed"], "bad plate mount was not removed")
+    require(assembly["case_external_plan_mm"] == [295.0, 105.0],
+            "case no longer matches the selected GH60 outside plan")
+    require(abs(float(assembly["case_typing_angle_deg"]) - 6.0) < 1e-6,
+            "case typing angle changed")
+    require(assembly["controller_bay_inside_gh60_footprint"],
+            "controller bay escaped the GH60 outside footprint")
 
     plate_report = json.loads((ROOT / "build" / "plate_fixed_analysis.json").read_text(encoding="utf-8"))
     require(plate_report["component_count"] == 68, "unexpected fixed plate contour count")

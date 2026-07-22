@@ -110,21 +110,37 @@ Keep the original `plate.dxf` only as provenance.
 
 ## 5. Mechanical architecture
 
-The full case envelope is approximately 293.75 x 109.25 x 27.5 mm.  Most of it
-matches a GH60 tray footprint.  A shallow, 55 mm-wide rear service bay provides
-the space required for the RP2040 carrier, USB-C tunnel, FFC bend, and removable
-cover.  This small rear projection was preferred over a PCB tongue.
+GH60 defines a PCB and mounting ecosystem, not one official case shell.  The
+case exterior therefore uses dimensions cross-checked against several open
+sources:
 
-Vertical stack, measured from the case bottom:
+- The original [GH60 project](https://github.com/komar007/gh60) supplies the
+  PCB and mounting datum.
+- [ejans/GH60-Case](https://github.com/ejans/GH60-Case) supplies the nominal
+  295 x 105 mm outside plan, 285 x 95 mm inside plan, and R5 plan corners.
+- [cheuksing/OS60](https://github.com/cheuksing/OS60) and
+  [mitaroThanken/Case60](https://github.com/mitaroThanken/Case60) independently
+  use a 6 degree GH60 typing plane.
 
-| Item | Z position |
-|---|---:|
-| Case floor | 0-2.4 mm |
-| Carrier PCB | 8.0-9.6 mm |
-| Main PCB | 18.0-19.6 mm |
-| Plate bottom | 24.6 mm |
-| Plate top | 26.1 mm |
-| Case wall top | 27.5 mm |
+The resulting Minilite64 case is a strict 295 x 105 mm rectangle with R5 plan
+corners, a 20 mm front, a 31.036 mm rear, and a 6 degree wedge.  The previous
+flat 293.75 x 103.25 mm tray and its rear controller projection were removed.
+The carrier was moved forward so the service cover, USB-C tunnel, and R6 FFC
+corridor all fit inside the GH60 exterior.
+
+The main PCB, plate, spacers, screw axes, and upper post sections share the
+6 degree plane.  Approximate assembled heights are:
+
+| Item | Rear datum | Front datum |
+|---|---:|---:|
+| Case floor | 0-2.4 mm | 0-2.4 mm |
+| Carrier PCB | 8.0-9.6 mm | horizontal |
+| Main PCB bottom | 20.8 mm | 10.86 mm |
+| Plate bottom | 27.36 mm | 17.43 mm |
+| Case rim | 30.52 mm | 20.53 mm |
+
+The full outside extrema are 31.036 mm at the rear edge and 20 mm at the front
+edge.  These values differ slightly from the PCB-edge datums in the table.
 
 The 80 mm FFC must be stored as a broad S-shaped loop in the reserved center
 bay.  Keep every bend at or above R6, keep the cable inside the documented
@@ -152,8 +168,9 @@ zero:
 
 The hot-swap keep-outs initially collided with three full-diameter posts.  The
 final posts use a wide lower body below component height and a 4.8 mm neck
-between sockets.  The service-cover screw towers were also moved outside the
-40 mm carrier outline after the first solid-intersection pass found an overlap.
+between sockets.  Their axes now follow the 6 degree PCB normal.  The
+service-cover screw towers were also moved outside the 40 mm carrier outline
+after the first solid-intersection pass found an overlap.
 
 These checks are envelope checks, not a substitute for a physical prototype.
 Print the split plate first, install representative switches, sockets,

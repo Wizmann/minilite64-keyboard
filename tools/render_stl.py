@@ -45,6 +45,16 @@ def render(triangles, output: Path, width=1800, height=900, view="iso"):
     elif view == "bottom":
         camera = unit(np.array([0.0, 0.0, -1.0]))
         right = np.array([-1.0, 0.0, 0.0])
+    elif view == "side":
+        # Right-side orthographic view: keyboard rear is at image right.
+        camera = unit(np.array([1.0, 0.0, 0.0]))
+        right = np.array([0.0, -1.0, 0.0])
+    elif view == "front":
+        camera = unit(np.array([0.0, 1.0, 0.0]))
+        right = np.array([1.0, 0.0, 0.0])
+    elif view == "rear":
+        camera = unit(np.array([0.0, -1.0, 0.0]))
+        right = np.array([-1.0, 0.0, 0.0])
     else:
         camera = unit(np.array([1.0, -1.15, 0.85]))
         right = unit(np.cross(camera, np.array([0.0, 0.0, 1.0])))
@@ -83,7 +93,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("stl", type=Path)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--view", choices=["iso", "top", "bottom"], default="iso")
+    parser.add_argument(
+        "--view", choices=["iso", "top", "bottom", "side", "front", "rear"],
+        default="iso",
+    )
     parser.add_argument("--width", type=int, default=1800)
     parser.add_argument("--height", type=int, default=900)
     args = parser.parse_args()
