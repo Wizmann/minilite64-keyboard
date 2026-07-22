@@ -20,7 +20,8 @@ not a single printable part.
 
 - `Minilite64_case_full.*` — one-piece case in assembled orientation.  It uses
   a 307 x 106.5 mm Linhai/Case.step-inspired GH60-style plan, R5 plan corners,
-  a 5 degree wedge, a 22.9 mm front, and a 32.218 mm rear.  The tapered wall,
+  a 5 degree wedge, a 20.0 mm spacebar side, and a 29.318 mm number-row side.
+  The tapered wall,
   R2 hand-contact rim, C1.2 lower edge break, and internal ribs follow the
   supplied references.  There is no controller tongue or rear projection.
 - `Minilite64_case_A1_standing.*` — the same one-piece case rotated onto its

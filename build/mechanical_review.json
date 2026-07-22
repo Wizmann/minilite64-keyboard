@@ -11,20 +11,20 @@
     },
     "case_full": {
       "valid": true,
-      "volume_mm3": 180316.971,
+      "volume_mm3": 167720.405,
       "bounds_mm": [
-        306.817,
-        106.317,
-        31.835
+        306.799,
+        106.299,
+        28.937
       ]
     },
     "case_a1_standing": {
       "valid": true,
-      "volume_mm3": 180316.971,
+      "volume_mm3": 167720.405,
       "bounds_mm": [
-        236.26,
-        236.26,
-        106.317
+        234.223,
+        234.223,
+        106.299
       ]
     },
     "service_cover": {
@@ -47,11 +47,11 @@
     }
   },
   "assembly": {
-    "main_pcb_bottom_z_mm": 22.0,
-    "plate_bottom_z_mm": 28.6,
+    "main_pcb_bottom_z_mm": 19.1,
+    "plate_bottom_z_mm": 25.700000000000003,
     "case_typing_angle_deg": 5.0,
-    "case_front_height_mm": 22.9,
-    "case_rear_height_mm": 32.218,
+    "case_front_height_mm": 20.0,
+    "case_rear_height_mm": 29.318,
     "case_external_plan_mm": [
       307.0,
       106.5
@@ -87,10 +87,12 @@
       153.15,
       35.5,
       3.0,
-      22.0
+      19.1
     ],
     "main_component_to_mount_boss_intersection_mm3": 0.0,
     "main_component_to_controller_intersection_mm3": 0.0,
+    "main_component_to_controller_clearance_mm": 1.359,
+    "main_component_to_floor_clearance_mm": 6.178,
     "controller_to_case_intersection_mm3": 0.0,
     "controller_to_service_cover_intersection_mm3": 0.0,
     "service_cover_to_case_intersection_mm3": 0.0,

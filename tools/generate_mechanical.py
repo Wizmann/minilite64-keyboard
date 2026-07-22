@@ -42,7 +42,7 @@ MAIN_MOUNTS = MAIN_ROUND_HOLES + MAIN_EDGE_SLOTS
 # Canonical GH60 enclosure reference used by this project:
 #   * 285 x 94.6 mm GH60 PCB datum
 #   * 307 x 106.5 mm Linhai-style outside plan, R5 plan corners
-#   * 5 degree typing angle and a 22.9/32.2 mm front/rear profile
+#   * 5 degree typing angle and a 20.0/29.3 mm low/high profile
 # The proportions follow the supplied Linhai 3MF and Case.step references.
 # Unlike the previous tray, the controller bay remains inside the body.
 CASE_W, CASE_H = 307.0, 106.5
@@ -50,7 +50,7 @@ CASE_X = PCB_CX - CASE_W / 2
 CASE_Y = PCB_CY - CASE_H / 2
 CASE_RADIUS = 5.0
 CASE_ANGLE_DEG = 5.0
-CASE_FRONT_H = 22.9
+CASE_FRONT_H = 20.0
 CASE_REAR_H = CASE_FRONT_H + CASE_H * math.tan(math.radians(CASE_ANGLE_DEG))
 CASE_SIDE_INSET = 2.5
 CASE_TOP_FILLET = 2.0
@@ -58,7 +58,7 @@ CASE_BOTTOM_CHAMFER = 1.2
 FLOOR_T = 2.4
 # Local stack datum at PCB y=0.  The whole PCB/plate stack follows the
 # five-degree Case.step typing plane.
-MAIN_PCB_Z = 22.0
+MAIN_PCB_Z = 19.1
 PCB_T = 1.6
 PLATE_GAP = 5.0
 PLATE_T = 1.5
@@ -635,7 +635,10 @@ def main():
     ctrl_components = controller_envelopes()
     # 20 mm cable plus 0.275 mm side clearance.  Connector hold-down tabs sit
     # outside this flexible-cable envelope and do not travel through the bay.
-    ffc_corridor = Part.makeBox(20.55, 35.7, 19.0, App.Vector(132.60, -0.2, 3.0))
+    ffc_corridor = Part.makeBox(
+        20.55, 35.7, MAIN_PCB_Z - 3.0,
+        App.Vector(132.60, -0.2, 3.0),
+    )
 
     report = {"artifacts": {}}
     artifacts = report["artifacts"]
@@ -658,6 +661,10 @@ def main():
 
     boss_collision = main_components.common(main_bosses()).Volume
     main_to_controller = main_components.common(carrier.fuse(ctrl_components)).Volume
+    main_to_controller_clearance = main_components.distToShape(
+        carrier.fuse(ctrl_components)
+    )[0]
+    main_to_floor_clearance = main_components.BoundBox.ZMin - FLOOR_T
     controller_to_case = carrier.fuse(ctrl_components).common(case).Volume
     controller_to_cover = carrier.fuse(ctrl_components).common(cover).Volume
     cover_to_case = cover.common(case).Volume
@@ -692,9 +699,11 @@ def main():
         "foot_recess_depth_mm": FOOT_RECESS_DEPTH,
         "foot_recess_minimum_floor_mm": FLOOR_T - FOOT_RECESS_DEPTH,
         "ffc_minimum_bend_radius_mm": 6.0,
-        "reserved_ffc_corridor_mm": [132.60, -0.2, 153.15, 35.5, 3.0, 22.0],
+        "reserved_ffc_corridor_mm": [132.60, -0.2, 153.15, 35.5, 3.0, MAIN_PCB_Z],
         "main_component_to_mount_boss_intersection_mm3": round(boss_collision, 6),
         "main_component_to_controller_intersection_mm3": round(main_to_controller, 6),
+        "main_component_to_controller_clearance_mm": round(main_to_controller_clearance, 3),
+        "main_component_to_floor_clearance_mm": round(main_to_floor_clearance, 3),
         "controller_to_case_intersection_mm3": round(controller_to_case, 6),
         "controller_to_service_cover_intersection_mm3": round(controller_to_cover, 6),
         "service_cover_to_case_intersection_mm3": round(cover_to_case, 6),

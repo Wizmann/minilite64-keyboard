@@ -53,6 +53,14 @@ def main():
             "case no longer matches the selected Linhai outside plan")
     require(abs(float(assembly["case_typing_angle_deg"]) - 5.0) < 1e-6,
             "case typing angle changed")
+    require(abs(float(assembly["case_front_height_mm"]) - 20.0) < 1e-6,
+            "spacebar-side case height changed")
+    require(abs(float(assembly["case_rear_height_mm"]) - 29.318) < 1e-3,
+            "number-row-side case height changed")
+    require(float(assembly["main_component_to_controller_clearance_mm"]) >= 1.25,
+            "main PCB stack is too close to the RP2040 carrier")
+    require(float(assembly["main_component_to_floor_clearance_mm"]) >= 6.0,
+            "hot-swap components are too close to the case floor")
     require(assembly["controller_bay_inside_gh60_footprint"],
             "controller bay escaped the GH60 outside footprint")
     require(not assembly["service_cover_external_button_access"],

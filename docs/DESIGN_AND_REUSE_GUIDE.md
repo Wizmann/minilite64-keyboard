@@ -131,7 +131,8 @@ datum:
   triangulated internal ribs.
 
 The resulting Minilite64 case uses a nominal 307 x 106.5 mm GH60-style plan,
-R5 plan corners, a 22.9 mm front, a 32.218 mm rear, and a 5 degree wedge.  It
+R5 plan corners, a 20.0 mm spacebar-side low edge, a 29.318 mm number-row-side
+high edge, and a 5 degree wedge.  It
 adds a 2.5 mm wall taper, an R2 upper edge, and a C1.2 lower edge break so the
 printed shell does not leave a sharp hand-contact edge.  The previous flat tray
 and its rear controller projection were removed.  The carrier was moved
@@ -148,13 +149,13 @@ support points make a slightly warped print more likely to rock.
 The main PCB, plate, spacers, screw axes, and upper post sections share the
 5 degree plane.  Approximate assembled heights are:
 
-| Item | Rear datum | Front datum |
+| Item | Number-row/high datum | Spacebar/low datum |
 |---|---:|---:|
 | Case floor | 0-2.4 mm | 0-2.4 mm |
 | Carrier PCB | 8.0-9.6 mm | horizontal |
-| Main PCB bottom | 22.0 mm | 13.68 mm |
-| Plate bottom | 28.6 mm | 20.28 mm |
-| Case rim | 32.218 mm exterior | 22.9 mm exterior |
+| Main PCB bottom | 19.1 mm | 10.81 mm |
+| Plate bottom | 25.7 mm | 17.41 mm |
+| Case rim | 29.318 mm exterior | 20.0 mm exterior |
 
 The height values at the PCB edges differ slightly from the case exterior-edge
 values because the PCB is inset from the front and rear walls.
