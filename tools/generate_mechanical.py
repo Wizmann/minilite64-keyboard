@@ -293,37 +293,46 @@ def plate_a1_fitcheck_shape(plate):
     far_left, far_right = -20.0, 310.0
     low_y, high_y = -10.0, 105.0
     boundary = PLATE_JOINT_BOUNDARY
+
+    def offset_boundary(distance):
+        """Miter-offset this axis-aligned open polyline to its left side."""
+        normals = []
+        for (ax, ay), (bx, by) in zip(boundary, boundary[1:]):
+            dx, dy = bx - ax, by - ay
+            length = math.hypot(dx, dy)
+            normals.append((-dy / length, dx / length))
+        shifted = []
+        for index, (x, y) in enumerate(boundary):
+            if index == 0:
+                nx, ny = normals[0]
+            elif index == len(boundary) - 1:
+                nx, ny = normals[-1]
+            else:
+                before, after = normals[index - 1], normals[index]
+                if abs(before[0] - after[0]) < 1e-9 and abs(before[1] - after[1]) < 1e-9:
+                    nx, ny = before
+                else:
+                    nx, ny = before[0] + after[0], before[1] + after[1]
+            shifted.append((x + distance * nx, y + distance * ny))
+        return shifted
+
+    # Offset each clipping boundary into its own half.  This directly creates
+    # the 0.4 mm seam and avoids an overlapping-compound ribbon cutter that
+    # older OpenCASCADE versions can classify as invalid.
+    left_boundary = offset_boundary(PLATE_JOINT_GAP / 2)
+    right_boundary = offset_boundary(-PLATE_JOINT_GAP / 2)
     left_polygon = [
-        (far_left, low_y), *boundary,
+        (far_left, low_y), *left_boundary,
         (far_left, high_y), (far_left, low_y),
     ]
     right_polygon = [
-        boundary[0], (far_right, low_y), (far_right, high_y), boundary[-1],
-        *reversed(boundary[:-1]),
+        right_boundary[0], (far_right, low_y), (far_right, high_y),
+        right_boundary[-1], *reversed(right_boundary[:-1]),
     ]
     left_region = Part.Face(wire(left_polygon)).extrude(App.Vector(0, 0, PLATE_T))
     right_region = Part.Face(wire(right_polygon)).extrude(App.Vector(0, 0, PLATE_T))
-
-    # Remove a narrow ribbon around every axis-aligned seam segment.  The
-    # visible gap is deliberate and prevents elephant-foot locking.
-    ribbon_parts = []
-    half_gap = PLATE_JOINT_GAP / 2
-    for (ax, ay), (bx, by) in zip(boundary, boundary[1:]):
-        if abs(ax - bx) < 1e-6:
-            ribbon_parts.append(Part.makeBox(
-                PLATE_JOINT_GAP, abs(by - ay) + PLATE_JOINT_GAP,
-                PLATE_T + 0.2,
-                App.Vector(ax - half_gap, min(ay, by) - half_gap, -0.1),
-            ))
-        else:
-            ribbon_parts.append(Part.makeBox(
-                abs(bx - ax) + PLATE_JOINT_GAP, PLATE_JOINT_GAP,
-                PLATE_T + 0.2,
-                App.Vector(min(ax, bx) - half_gap, ay - half_gap, -0.1),
-            ))
-    printable = plate.cut(Part.makeCompound(ribbon_parts))
-    left = printable.common(left_region).removeSplitter()
-    right = printable.common(right_region).removeSplitter()
+    left = plate.common(left_region).removeSplitter()
+    right = plate.common(right_region).removeSplitter()
 
     # Both disconnected parts are flat and compact in this slicer-only file.
     left = moved(left, App.Vector(
@@ -334,7 +343,7 @@ def plate_a1_fitcheck_shape(plate):
         5.0 + left.BoundBox.YLength + PLATE_JOINT_BED_GAP - right.BoundBox.YMin,
         0,
     ))
-    return Part.makeCompound([left, right])
+    return [left, right]
 
 
 def board_outline_points():
@@ -661,20 +670,32 @@ def export_shape(name, shape, stl=True):
                            round(shape.BoundBox.ZLength, 3)]}
 
 
-def export_stl_only(name, shape):
+def export_stl_only(name, shapes):
     """Export a slicer-only artifact without adding redundant CAD files."""
-    if shape.isNull() or not shape.isValid():
-        raise RuntimeError(f"Invalid FreeCAD shape: {name}")
+    if not isinstance(shapes, (list, tuple)):
+        shapes = [shapes]
+    for index, shape in enumerate(shapes):
+        if shape.isNull() or not shape.isValid():
+            raise RuntimeError(f"Invalid FreeCAD shape: {name}[{index}]")
     doc = App.newDocument(name)
-    obj = doc.addObject("Part::Feature", name)
-    obj.Shape = shape
+    objects = []
+    for index, shape in enumerate(shapes, 1):
+        obj = doc.addObject("Part::Feature", f"{name}_{index}")
+        obj.Shape = shape
+        objects.append(obj)
     doc.recompute()
-    Mesh.export([obj], str(OUT / f"{name}.stl"))
+    Mesh.export(objects, str(OUT / f"{name}.stl"))
     App.closeDocument(doc.Name)
-    return {"valid": True, "volume_mm3": round(shape.Volume, 3),
-            "bounds_mm": [round(shape.BoundBox.XLength, 3),
-                           round(shape.BoundBox.YLength, 3),
-                           round(shape.BoundBox.ZLength, 3)]}
+    x_min = min(shape.BoundBox.XMin for shape in shapes)
+    y_min = min(shape.BoundBox.YMin for shape in shapes)
+    z_min = min(shape.BoundBox.ZMin for shape in shapes)
+    x_max = max(shape.BoundBox.XMax for shape in shapes)
+    y_max = max(shape.BoundBox.YMax for shape in shapes)
+    z_max = max(shape.BoundBox.ZMax for shape in shapes)
+    return {"valid": True,
+            "volume_mm3": round(sum(shape.Volume for shape in shapes), 3),
+            "bounds_mm": [round(x_max - x_min, 3), round(y_max - y_min, 3),
+                           round(z_max - z_min, 3)]}
 
 
 def export_assembly(name, objects):
