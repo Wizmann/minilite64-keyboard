@@ -42,7 +42,8 @@ plane; the carrier remains horizontal at the bottom for service access.
 
 - `Minilite64_service_cover.*` — removable bottom cover carrying the 40 x
   36 mm RP2040-Zero carrier.  It includes four carrier posts, cover screw
-  holes, and a BOOT/RESET access opening.
+  holes, and a closed outside surface.  Remove the cover if physical
+  BOOT/RESET recovery is ever required.
 
 ## Plate
 

@@ -59,9 +59,11 @@ uses 3.2 mm clearance holes.
 The carrier is 40 x 36 mm with four 2.2 mm holes at `(3,3)`, `(37,3)`,
 `(3,33)`, and `(37,33)` mm.  The RP2040-Zero is mounted on F.Cu and the FFC
 connector is on B.Cu.  In the case, the module side faces the bottom service
-cover.  The cover has a large access window for BOOT/RESET.  Removing the cover
-brings the carrier out far enough to reach the FFC latch without sharply
-folding the cable.
+cover.  The cover intentionally has no external BOOT/RESET opening.  Normal
+remapping uses Vial and the keymap provides `QK_BOOT`; if damaged firmware
+cannot enter its bootloader, remove the service cover to press the physical
+buttons.  Removing the cover also brings the carrier out far enough to reach
+the FFC latch without sharply folding the cable.
 
 Do not regenerate the routed carrier from the old seed.  The generator now
 writes an optional unrouted carrier seed only to `build/` when invoked with
@@ -205,8 +207,8 @@ stabilizers, screws, and an actual FFC, then print the case.
 4. Solder both 20P ZIF connectors.  Confirm pin 1 before installing the FFC.
 5. Solder the RP2040-Zero castellations to the carrier with USB-C toward the
    rear opening.
-6. Mount the carrier to the service cover, module side toward the cover access
-   window.
+6. Mount the carrier to the service cover, module side toward the closed cover
+   surface; the modeled standoffs provide component clearance.
 7. Insert and lock the FFC at the carrier, route a broad R6-or-larger S loop,
    and lock the main-board end.
 8. Heat-set the seven main M2 inserts with a temperature-controlled tip.  Keep

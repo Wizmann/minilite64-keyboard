@@ -65,7 +65,7 @@
     },
     "service_cover": {
       "valid": true,
-      "volume_mm3": 3828.484,
+      "volume_mm3": 5013.445,
       "bounds_mm": [
         53.65,
         39.8,
@@ -114,6 +114,7 @@
     "main_component_to_mount_boss_intersection_mm3": 0.0,
     "main_component_to_controller_intersection_mm3": 0.0,
     "controller_to_case_intersection_mm3": 0.0,
+    "controller_to_service_cover_intersection_mm3": 0.0,
     "service_cover_to_case_intersection_mm3": 0.0,
     "main_pcb_to_case_intersection_mm3": 0.0,
     "plate_to_case_intersection_mm3": 0.0,
@@ -123,6 +124,7 @@
     "minimum_keycap_to_inner_wall_xy_clearance_mm": 0.7,
     "wall_top_to_keycap_skirt_vertical_clearance_mm": 1.5,
     "controller_bay_inside_gh60_footprint": true,
+    "service_cover_external_button_access": false,
     "bottom_row_conflicting_screw_relief_removed": true,
     "round_main_mounts": [
       [

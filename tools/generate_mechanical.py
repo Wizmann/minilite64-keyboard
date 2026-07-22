@@ -440,13 +440,11 @@ def service_cover_shape():
     plug = rounded_prism(sx + 0.20, sy + 0.20, sw - 0.40, sh - 0.40, 1.8, 1.15, 1.20)
     cover = flange.fuse(plug)
 
-    # Carrier mounting posts; carrier F.Cu faces the cover, so the large
-    # opening exposes the onboard BOOT/RESET controls after assembly.
+    # Carrier mounting posts.  The RP2040-Zero faces the closed inner surface;
+    # BOOT/RESET remain serviceable only after removing the cover.
     for x, y in CARRIER_HOLES:
         cover = cover.fuse(Part.makeCylinder(2.8, CARRIER_Z - 2.35, App.Vector(x, y, 2.35)))
         cover = cover.cut(Part.makeCylinder(1.6, 4.8, App.Vector(x, y, CARRIER_Z - 4.7)))
-    access = rounded_prism(132.8, 0.1, 20.2, 25.1, 1.8, -0.2, 3.0)
-    cover = cover.cut(access)
     for x, y in SERVICE_SCREWS:
         cover = cover.cut(Part.makeCylinder(1.45, 3.0, App.Vector(x, y, -0.2)))
         cover = cover.cut(Part.makeCylinder(2.8, 0.9, App.Vector(x, y, -0.05)))
@@ -649,6 +647,7 @@ def main():
     boss_collision = main_components.common(main_bosses()).Volume
     main_to_controller = main_components.common(carrier.fuse(ctrl_components)).Volume
     controller_to_case = carrier.fuse(ctrl_components).common(case).Volume
+    controller_to_cover = carrier.fuse(ctrl_components).common(cover).Volume
     cover_to_case = cover.common(case).Volume
     pcb_to_case = pcb.common(case).Volume
     placed_plate = tilted(moved(plate, App.Vector(0, 0, PLATE_Z)))
@@ -679,6 +678,7 @@ def main():
         "main_component_to_mount_boss_intersection_mm3": round(boss_collision, 6),
         "main_component_to_controller_intersection_mm3": round(main_to_controller, 6),
         "controller_to_case_intersection_mm3": round(controller_to_case, 6),
+        "controller_to_service_cover_intersection_mm3": round(controller_to_cover, 6),
         "service_cover_to_case_intersection_mm3": round(cover_to_case, 6),
         "main_pcb_to_case_intersection_mm3": round(pcb_to_case, 6),
         "plate_to_case_intersection_mm3": round(plate_to_case, 6),
@@ -688,6 +688,7 @@ def main():
         "minimum_keycap_to_inner_wall_xy_clearance_mm": round(min(keycap_clearances), 3),
         "wall_top_to_keycap_skirt_vertical_clearance_mm": 1.5,
         "controller_bay_inside_gh60_footprint": True,
+        "service_cover_external_button_access": False,
         "bottom_row_conflicting_screw_relief_removed": True,
         "round_main_mounts": MAIN_ROUND_HOLES,
         "side_main_mounts": MAIN_EDGE_SLOTS,

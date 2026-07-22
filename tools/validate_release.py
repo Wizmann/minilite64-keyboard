@@ -52,6 +52,8 @@ def main():
             "case typing angle changed")
     require(assembly["controller_bay_inside_gh60_footprint"],
             "controller bay escaped the GH60 outside footprint")
+    require(not assembly["service_cover_external_button_access"],
+            "service cover must not expose BOOT/RESET externally")
     expected_bottom_mounts = [[47.625, 85.2], [238.125, 85.2]]
     require(assembly["round_main_mounts"][-2:] == expected_bottom_mounts,
             "balanced bottom-row mount axes changed")
