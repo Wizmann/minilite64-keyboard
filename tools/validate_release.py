@@ -40,6 +40,9 @@ def main():
     check_drc(ROOT / "build" / "controller_final_drc.rpt")
 
     review = json.loads((ROOT / "build" / "mechanical_review.json").read_text(encoding="utf-8"))
+    require(set(review["artifacts"]) == {
+        "plate_full", "case_full", "case_a1_standing", "service_cover", "plate_spacer",
+    }, "unexpected or missing mechanical release artifacts")
     assembly = review["assembly"]
     intersection_keys = [key for key in assembly if key.endswith("intersection_mm3")]
     require(intersection_keys, "mechanical report contains no intersection checks")
@@ -54,6 +57,15 @@ def main():
             "controller bay escaped the GH60 outside footprint")
     require(not assembly["service_cover_external_button_access"],
             "service cover must not expose BOOT/RESET externally")
+    mechanical_dir = ROOT / "hardware" / "mechanical"
+    forbidden_split_names = (
+        "Minilite64_case_A1_left.*", "Minilite64_case_A1_right.*",
+        "Minilite64_case_joiner_print_2x.*", "Minilite64_plate_print_left.*",
+        "Minilite64_plate_print_right.*",
+    )
+    require(not any(next(mechanical_dir.glob(pattern), None) is not None
+                    for pattern in forbidden_split_names),
+            "obsolete split-print artifacts are still present")
     expected_bottom_mounts = [[47.625, 85.2], [238.125, 85.2]]
     require(assembly["round_main_mounts"][-2:] == expected_bottom_mounts,
             "balanced bottom-row mount axes changed")

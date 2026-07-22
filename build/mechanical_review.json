@@ -9,24 +9,6 @@
         1.5
       ]
     },
-    "plate_left": {
-      "valid": true,
-      "volume_mm3": 9590.05,
-      "bounds_mm": [
-        142.687,
-        94.926,
-        1.5
-      ]
-    },
-    "plate_right": {
-      "valid": true,
-      "volume_mm3": 9639.181,
-      "bounds_mm": [
-        142.687,
-        94.926,
-        1.5
-      ]
-    },
     "case_full": {
       "valid": true,
       "volume_mm3": 180583.342,
@@ -45,24 +27,6 @@
         106.317
       ]
     },
-    "case_left": {
-      "valid": true,
-      "volume_mm3": 90395.492,
-      "bounds_mm": [
-        153.409,
-        106.317,
-        31.835
-      ]
-    },
-    "case_right": {
-      "valid": true,
-      "volume_mm3": 89815.129,
-      "bounds_mm": [
-        153.409,
-        106.317,
-        31.835
-      ]
-    },
     "service_cover": {
       "valid": true,
       "volume_mm3": 5013.445,
@@ -79,15 +43,6 @@
         6.0,
         5.998,
         5.0
-      ]
-    },
-    "split_joiner": {
-      "valid": true,
-      "volume_mm3": 459.771,
-      "bounds_mm": [
-        32.0,
-        10.6,
-        1.5
       ]
     }
   },

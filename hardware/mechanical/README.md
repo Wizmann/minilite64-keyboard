@@ -27,14 +27,11 @@ not a single printable part.
   front wall and 45 degrees across the bed.  Its stored bounds are about
   236.3 x 236.3 x 106.3 mm, so it fits the Bambu A1 with room for an
   approximately 8 mm brim.  Use this file for the preferred one-piece print.
-- `Minilite64_case_A1_left.*` — left half of the Bambu A1 printable case.
-- `Minilite64_case_A1_right.*` — right half of the Bambu A1 printable case.
-- `Minilite64_case_joiner_print_2x.*` — bottom joining strap; print two copies
-  to connect the A1 left/right case halves.
 
 The RP2040 carrier, service cover, USB-C tunnel, and R6 FFC corridor are custom
 internal features.  They do not change the selected rectangular outside
 envelope.
+
 The PCB/plate stack and its seven mounting axes follow the 5 degree typing
 plane; the carrier remains horizontal at the bottom for service access.
 
@@ -51,8 +48,6 @@ plane; the carrier remains horizontal at the bottom for service access.
   fabrication.  This is the DXF to send to the plate vendor.
 - `Minilite64_plate_print_fixed.*` — one-piece, 1.5 mm printable plate for a
   large printer.  It is primarily a fit-check model.
-- `Minilite64_plate_print_left.*` — left Bambu A1-sized plate test half.
-- `Minilite64_plate_print_right.*` — right Bambu A1-sized plate test half.
 - `Minilite64_plate_spacer_print_7x.*` — 5 mm plate-to-PCB spacer; print seven
   copies, one at each retained mounting location.
 

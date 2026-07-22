@@ -388,7 +388,7 @@ def case_floor_ribs():
     return Part.makeCompound(ribs)
 
 
-def case_shape(split_features=False):
+def case_shape():
     outer = outer_case_prism()
     cavity = rounded_prism(-0.30, -0.30, 286.35, 96.35, 1.2,
                            FLOOR_T, CASE_REAR_H - FLOOR_T + 0.7)
@@ -421,15 +421,6 @@ def case_shape(split_features=False):
         case = case.fuse(Part.makeCylinder(3.2, 6.2, App.Vector(x, y, FLOOR_T)))
         case = case.cut(Part.makeCylinder(1.9, 5.2, App.Vector(x, y, 3.4)))
 
-    if split_features:
-        # Two recessed bottom straps make the A1-sized halves self-aligning and
-        # serviceable.  Their bosses stop well below all hot-swap envelopes.
-        for y in (58.0, 84.0):
-            recess = Part.makeBox(32.4, 11.0, 1.55, App.Vector(126.675, y - 5.5, -0.05))
-            case = case.cut(recess)
-            for x in (134.375, 151.375):
-                case = case.fuse(Part.makeCylinder(3.6, 5.8, App.Vector(x, y, FLOOR_T)))
-                case = case.cut(Part.makeCylinder(1.9, 5.0, App.Vector(x, y, 3.2)))
     return case.removeSplitter()
 
 
@@ -526,14 +517,6 @@ def spacer_shape():
     return outer.cut(inner)
 
 
-def joiner_shape():
-    bar = rounded_prism(0, 0, 32.0, 10.6, 1.3, 0, 1.50)
-    for x in (7.7, 24.7):
-        bar = bar.cut(Part.makeCylinder(1.45, 2.0, App.Vector(x, 5.3, -0.2)))
-        bar = bar.cut(Part.makeCylinder(2.8, 0.8, App.Vector(x, 5.3, -0.05)))
-    return bar
-
-
 def standing_print_shape(shape):
     """Orient the one-piece case like the supplied A1-compatible 3MF.
 
@@ -601,7 +584,7 @@ def main():
     BUILD.mkdir(exist_ok=True)
     contours, corrected_dxf_contours = repaired_plate_contours()
     plate = plate_shape(contours)
-    case = case_shape(False)
+    case = case_shape()
     cover = service_cover_shape()
     pcb = tilted(moved(simplified_main_pcb(), App.Vector(0, 0, MAIN_PCB_Z)))
     carrier = carrier_shape()
@@ -614,26 +597,15 @@ def main():
     # outside this flexible-cable envelope and do not travel through the bay.
     ffc_corridor = Part.makeBox(20.55, 35.7, 19.0, App.Vector(132.60, -0.2, 3.0))
 
-    centre = PCB_CX
-    left_box = Part.makeBox(400, 200, 50, App.Vector(-100, -30, -5))
-    right_box = Part.makeBox(400, 200, 50, App.Vector(centre, -30, -5))
-    left_box = left_box.common(Part.makeBox(centre + 100, 200, 50, App.Vector(-100, -30, -5)))
-    split_case = case_shape(True)
-
     report = {"artifacts": {}}
     artifacts = report["artifacts"]
     artifacts["plate_full"] = export_shape("Minilite64_plate_print_fixed", plate)
-    artifacts["plate_left"] = export_shape("Minilite64_plate_print_left", plate.common(left_box))
-    artifacts["plate_right"] = export_shape("Minilite64_plate_print_right", plate.common(right_box))
     artifacts["case_full"] = export_shape("Minilite64_case_full", case)
     artifacts["case_a1_standing"] = export_shape(
         "Minilite64_case_A1_standing", standing_print_shape(case)
     )
-    artifacts["case_left"] = export_shape("Minilite64_case_A1_left", split_case.common(left_box))
-    artifacts["case_right"] = export_shape("Minilite64_case_A1_right", split_case.common(right_box))
     artifacts["service_cover"] = export_shape("Minilite64_service_cover", cover)
     artifacts["plate_spacer"] = export_shape("Minilite64_plate_spacer_print_7x", spacer_shape())
-    artifacts["split_joiner"] = export_shape("Minilite64_case_joiner_print_2x", joiner_shape())
 
     export_assembly("Minilite64_assembly_review", [
         ("Case", case), ("ServiceCover", cover), ("MainPCB", pcb),

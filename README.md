@@ -11,7 +11,7 @@ lighting.
 - `hardware/keyboard/Minilite64.kicad_pcb` — routed GH60-size main PCB
 - `hardware/controller/RP2040_Zero_Carrier.kicad_pcb` — routed 40 x 36 mm carrier
 - `hardware/mechanical/Minilite64_plate_fixed.dxf` — corrected plate for PC/FR4 ordering
-- `hardware/mechanical/*.stl` and `*.step` — full-size, A1 standing, and A1 split mechanical parts
+- `hardware/mechanical/*.stl` and `*.step` — full-size and A1 standing mechanical parts
 - `manufacturing/*_gerber.zip` — order-ready PCB packages
 - `firmware/vial-qmk/keyboards/minilite64` — Vial-QMK keyboard source
 - `firmware/releases/Minilite64_vial.uf2` — locally verified RP2040 firmware

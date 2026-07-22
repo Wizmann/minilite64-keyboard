@@ -20,8 +20,8 @@ requirements are:
 - A 20-position, 1.0 mm Type-A/same-side FFC, nominally 80 mm long.
 - Vial/VIA remapping, four dynamic layers, Bootmagic, and a firmware boot key.
 - A PC or FR4 plate, 1.5 mm thick, plus printable verification plates.
-- A Case.step-inspired wedge case, a bottom service cover, a one-piece Bambu
-  A1 standing print, and split files as a fallback.
+- A Case.step-inspired wedge case, a bottom service cover, and a one-piece
+  Bambu A1 standing print.
 
 ## 2. Electrical architecture
 
@@ -161,16 +161,14 @@ The assembled-orientation case is 307 mm long, but the one-piece
 `Minilite64_case_A1_standing.stl` is stored front-wall-down and rotated 45
 degrees.  Its approximate slicer bounds are 236.3 x 236.3 x 106.3 mm, leaving
 room for an approximately 8 mm brim on the Bambu A1.  Use the standing file as
-the preferred one-piece print.  The `*_A1_left.stl` and `*_A1_right.stl` case
-halves and two joiner straps remain as a lower-risk fallback.  The full and
-split plate files are primarily fit-check models; order the final plate in
-1.5 mm PC or FR4 from the corrected DXF.
+the one-piece print.  The printable full plate is primarily a fit-check model;
+order the final plate in 1.5 mm PC or FR4 from the corrected DXF.
 
 For the standing case, keep the stored orientation, add an 8-10 mm brim, and
 inspect the slicer's support preview around the horizontal insert bosses,
 service opening, and internal ribs.  Do not scale the model to make it fit.
-First print a short cropped test or one split half to tune insert-pilot and
-screw clearances for the chosen filament before committing to the full print.
+Print a small insert-pilot test coupon to tune screw clearances for the chosen
+filament before committing to the full case.
 
 ## 6. Mechanical checks performed
 
@@ -196,7 +194,7 @@ moved outside the 40 mm carrier outline after the first solid-intersection pass
 found an overlap.
 
 These checks are envelope checks, not a substitute for a physical prototype.
-Print the split plate first, install representative switches, sockets,
+Print the fit-check plate, install representative switches, sockets,
 stabilizers, screws, and an actual FFC, then print the case.
 
 ## 7. Assembly order
