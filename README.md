@@ -1,7 +1,8 @@
 # Minilite64 Keyboard
 
-Minilite64 is a 64-key, two-layer, hot-swap keyboard built around a
-Waveshare RP2040-Zero.  The main keyboard PCB and the controller carrier are
+Minilite64 is a 64-key hot-swap keyboard built around a Waveshare
+RP2040-Zero.  Its main PCB uses two copper layers; the Vial firmware exposes
+four dynamic keymap layers.  The main keyboard PCB and controller carrier are
 connected by a 20-position, 1.0 mm Type-A FFC.  The design has no per-key
 lighting.
 

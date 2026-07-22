@@ -15,7 +15,7 @@ requirements are:
 - Kailh CPG151101S11-style hot-swap sockets on the PCB bottom.
 - One hand-solderable SOD-123 1N4148W diode per key.
 - No keyboard lighting.  The RP2040-Zero's onboard indicators are unaffected.
-- A two-layer main PCB with a rectangular GH60-style envelope and no PCB tongue.
+- A two-copper-layer main PCB with a rectangular GH60-style envelope and no PCB tongue.
 - A separate Waveshare RP2040-Zero carrier.
 - A 20-position, 1.0 mm Type-A/same-side FFC, nominally 80 mm long.
 - Vial/VIA remapping, four dynamic layers, Bootmagic, and a firmware boot key.
@@ -228,7 +228,7 @@ python tools/validate_release.py
 
 ## 10. Manufacturing and release checklist
 
-- Confirm two-layer, 1.6 mm FR4 for both PCBs.
+- Confirm two-copper-layer, 1.6 mm FR4 for both PCBs.
 - Confirm all seven Gerber layers exist: F/B copper, F/B mask, F/B silkscreen,
   and Edge.Cuts.
 - Include both PTH and NPTH drill files.
@@ -258,4 +258,3 @@ python tools/validate_release.py
   removed for service, and where slack cable goes.
 - Preserve the original customer geometry, but publish a clearly named fixed
   derivative when a source drawing contains a known collision.
-
