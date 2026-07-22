@@ -1,0 +1,531 @@
+"""Generate the printable Minilite64 mechanical package with FreeCAD.
+
+Run with FreeCAD's Python, for example:
+    freecadcmd.exe tools/generate_mechanical.py
+
+The supplied plate DXF contains one obsolete screw relief merged into the
+bottom-row Menu switch opening.  This generator repairs that contour before
+making the printable plate and corrected manufacturing DXF.  The three round
+mounting holes and the two side mounting notches remain.
+"""
+
+from __future__ import annotations
+
+import json
+import math
+from collections import defaultdict, deque
+from pathlib import Path
+
+import FreeCAD as App
+import Mesh
+import Part
+
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "hardware" / "mechanical"
+BUILD = ROOT / "build"
+
+PCB_X0, PCB_Y0 = 0.15, 0.15
+PCB_X1, PCB_Y1 = 285.60, 95.10
+PCB_CX, PCB_CY = (PCB_X0 + PCB_X1) / 2, (PCB_Y0 + PCB_Y1) / 2
+MAIN_ROUND_HOLES = [
+    (25.5749577, 28.2247775),
+    (128.5759577, 47.6255775),
+    (260.4244577, 28.2247775),
+]
+MAIN_EDGE_SLOTS = [(3.65, 56.824), (282.10, 56.824)]
+MAIN_MOUNTS = MAIN_ROUND_HOLES + MAIN_EDGE_SLOTS
+
+CASE_X, CASE_Y = -4.0, -4.0
+CASE_W, CASE_H = 293.75, 103.25
+CASE_TOP = 27.5
+FLOOR_T = 2.4
+MAIN_PCB_Z = 18.0
+PCB_T = 1.6
+PLATE_GAP = 5.0
+PLATE_T = 1.5
+PLATE_Z = MAIN_PCB_Z + PCB_T + PLATE_GAP
+
+# The controller is kept at the centre rear.  Its six millimetre rear service
+# bay is the only deviation from the ordinary GH60 rectangular footprint.
+CARRIER_ORIGIN = (122.875, -7.30)
+CARRIER_Z = 8.0
+CARRIER_T = 1.6
+CARRIER_HOLES_LOCAL = [(3, 3), (37, 3), (3, 33), (37, 33)]
+CARRIER_HOLES = [
+    (CARRIER_ORIGIN[0] + x, CARRIER_ORIGIN[1] + y)
+    for x, y in CARRIER_HOLES_LOCAL
+]
+
+SERVICE_OUTER = (115.90, -9.25, 54.05, 41.20)
+SERVICE_OPEN = (117.45, -8.15, 50.95, 38.85)
+SERVICE_SCREWS = [(118.9, -6.3), (166.9, -6.3), (118.9, 28.7), (166.9, 28.7)]
+
+
+def pkey(point, places=5):
+    return round(point[0], places), round(point[1], places)
+
+
+def read_dxf_lines(path: Path):
+    raw = path.read_text(encoding="ascii", errors="ignore").splitlines()
+    pairs = [(raw[i].strip(), raw[i + 1].strip()) for i in range(0, len(raw) - 1, 2)]
+    result = []
+    i = 0
+    while i < len(pairs):
+        if pairs[i] == ("0", "LINE"):
+            fields = {}
+            i += 1
+            while i < len(pairs) and pairs[i][0] != "0":
+                fields[pairs[i][0]] = pairs[i][1]
+                i += 1
+            result.append(((float(fields["10"]), float(fields["20"])),
+                           (float(fields["11"]), float(fields["21"]))))
+            continue
+        i += 1
+    return result
+
+
+def ordered_contours(lines):
+    incident = defaultdict(list)
+    for index, (a, b) in enumerate(lines):
+        incident[pkey(a)].append(index)
+        incident[pkey(b)].append(index)
+    unseen = set(range(len(lines)))
+    contours = []
+    while unseen:
+        seed = unseen.pop()
+        queue = deque([seed])
+        component = [seed]
+        while queue:
+            edge = queue.popleft()
+            for endpoint in lines[edge]:
+                for neighbor in incident[pkey(endpoint)]:
+                    if neighbor in unseen:
+                        unseen.remove(neighbor)
+                        queue.append(neighbor)
+                        component.append(neighbor)
+        adjacency = defaultdict(list)
+        for edge in component:
+            a, b = lines[edge]
+            adjacency[pkey(a)].append(pkey(b))
+            adjacency[pkey(b)].append(pkey(a))
+        start = min(adjacency)
+        points = [start]
+        previous = None
+        current = start
+        while True:
+            candidates = [point for point in adjacency[current] if point != previous]
+            if not candidates:
+                break
+            following = candidates[0]
+            if following == start:
+                points.append(start)
+                break
+            points.append(following)
+            previous, current = current, following
+        if points[-1] != points[0]:
+            points.append(points[0])
+        contours.append(points)
+    return contours
+
+
+def bounds(points):
+    xs, ys = [p[0] for p in points], [p[1] for p in points]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def repaired_plate_contours():
+    contours = ordered_contours(read_dxf_lines(ROOT / "plate.dxf"))
+    outer = max(contours, key=lambda c: (bounds(c)[2] - bounds(c)[0]) * (bounds(c)[3] - bounds(c)[1]))
+    inner = [c for c in contours if c is not outer]
+
+    # The merged Menu/screw contour is the only 33-segment internal contour.
+    bad = next(c for c in inner if len(c) - 1 == 33)
+    bad_box = bounds(bad)
+    bad_cy = (bad_box[1] + bad_box[3]) / 2
+    normal = [
+        c for c in inner
+        if len(c) - 1 == 20
+        and 15.45 < bounds(c)[2] - bounds(c)[0] < 15.75
+        and 13.85 < bounds(c)[3] - bounds(c)[1] < 14.15
+    ]
+    reference = min(
+        normal,
+        key=lambda c: abs((bounds(c)[0] + bounds(c)[2]) / 2 - 204.7875)
+        + abs((bounds(c)[1] + bounds(c)[3]) / 2 - bad_cy),
+    )
+    ref_box = bounds(reference)
+    ref_cx, ref_cy = (ref_box[0] + ref_box[2]) / 2, (ref_box[1] + ref_box[3]) / 2
+    menu_cx = 9.625 * 19.05
+    replacement = [(x + menu_cx - ref_cx, y + bad_cy - ref_cy) for x, y in reference]
+    inner[inner.index(bad)] = replacement
+
+    x0, y0, x1, y1 = bounds(outer)
+    dxf_cx, dxf_cy = (x0 + x1) / 2, (y0 + y1) / 2
+
+    def to_pcb(contour):
+        return [
+            (x + PCB_CX - dxf_cx, PCB_CY - (y - dxf_cy))
+            for x, y in contour
+        ]
+
+    return [to_pcb(outer)] + [to_pcb(c) for c in inner], [outer] + inner
+
+
+def wire(points):
+    vectors = [App.Vector(x, y, 0) for x, y in points]
+    if vectors[-1].distanceToPoint(vectors[0]) > 1e-6:
+        vectors.append(vectors[0])
+    return Part.makePolygon(vectors)
+
+
+def moved(shape, vector):
+    """Return a translated copy; compatible with older FreeCAD releases."""
+    result = shape.copy()
+    result.translate(vector)
+    return result
+
+
+def plate_shape(contours):
+    outer = Part.Face(wire(contours[0])).extrude(App.Vector(0, 0, PLATE_T))
+    cutters = [Part.Face(wire(c)).extrude(App.Vector(0, 0, PLATE_T + 0.2)) for c in contours[1:]]
+    return outer.cut(Part.makeCompound(cutters)).removeSplitter()
+
+
+def board_outline_points():
+    right = [
+        (285.60, 54.324), (282.10, 54.324), (281.327, 54.445),
+        (280.631, 54.801), (280.078, 55.355), (279.723, 56.051),
+        (279.600, 56.824), (279.723, 57.597), (280.078, 58.294),
+        (280.631, 58.847), (281.327, 59.201), (282.10, 59.324),
+        (285.60, 59.324),
+    ]
+    left = [(285.75 - x, y) for x, y in reversed(right)]
+    return [(0.15, 0.15), (285.60, 0.15), *right,
+            (285.60, 95.10), (0.15, 95.10), *left, (0.15, 0.15)]
+
+
+def simplified_main_pcb():
+    shape = Part.Face(wire(board_outline_points())).extrude(App.Vector(0, 0, PCB_T))
+    for x, y in MAIN_ROUND_HOLES:
+        shape = shape.cut(Part.makeCylinder(1.35, PCB_T + 0.2, App.Vector(x, y, -0.1)))
+    return shape.removeSplitter()
+
+
+def rounded_prism(x, y, width, height, radius, z0, depth):
+    radius = min(radius, width / 2, height / 2)
+    a = Part.makeBox(width - 2 * radius, height, depth, App.Vector(x + radius, y, z0))
+    b = Part.makeBox(width, height - 2 * radius, depth, App.Vector(x, y + radius, z0))
+    result = a.fuse(b)
+    for cx, cy in [
+        (x + radius, y + radius), (x + width - radius, y + radius),
+        (x + radius, y + height - radius), (x + width - radius, y + height - radius),
+    ]:
+        result = result.fuse(Part.makeCylinder(radius, depth, App.Vector(cx, cy, z0)))
+    return result.removeSplitter()
+
+
+def outer_case_prism(z0, depth):
+    base = rounded_prism(CASE_X, CASE_Y, CASE_W, CASE_H, 4.0, z0, depth)
+    bump = rounded_prism(115.35, -10.0, 55.05, 12.0, 3.0, z0, depth)
+    return base.fuse(bump).removeSplitter()
+
+
+def main_bosses():
+    result = []
+    for x, y in MAIN_MOUNTS:
+        # The narrow 4.8 mm neck passes between hot-swap sockets.  The wider
+        # lower body carries the insert below the component keep-out height.
+        lower_h = 12.1
+        lower = Part.makeCylinder(3.75, lower_h, App.Vector(x, y, FLOOR_T))
+        neck = Part.makeCylinder(2.40, MAIN_PCB_Z - FLOOR_T - lower_h,
+                                 App.Vector(x, y, FLOOR_T + lower_h))
+        result.append(lower.fuse(neck))
+    return Part.makeCompound(result)
+
+
+def case_shape(split_features=False):
+    outer = outer_case_prism(0, CASE_TOP)
+    cavity = rounded_prism(-0.30, -0.30, 286.35, 95.85, 1.2,
+                           FLOOR_T, CASE_TOP - FLOOR_T + 0.2)
+    rear_cavity = rounded_prism(116.85, -8.10, 51.8, 13.0, 1.5,
+                                FLOOR_T, CASE_TOP - FLOOR_T + 0.2)
+    case = outer.cut(cavity.fuse(rear_cavity))
+
+    # Rear USB-C tunnel.  The module receptacle face is only about 3 mm inboard.
+    usb = Part.makeBox(15.5, 10.5, 7.0, App.Vector(136.8, -10.5, 3.5))
+    case = case.cut(usb)
+
+    # Bottom service-cover opening plus a shallow flush flange recess.
+    sx, sy, sw, sh = SERVICE_OPEN
+    through = rounded_prism(sx, sy, sw, sh, 2.0, -0.2, FLOOR_T + 0.4)
+    ox, oy, ow, oh = SERVICE_OUTER
+    recess = rounded_prism(ox, oy, ow, oh, 2.2, -0.1, 1.25)
+    case = case.cut(through.fuse(recess))
+
+    # Main PCB/plate stack standoffs, with M2.5 heat-set insert pilots.
+    bosses = main_bosses()
+    case = case.fuse(bosses)
+    for x, y in MAIN_MOUNTS:
+        case = case.cut(Part.makeCylinder(2.0, 5.3, App.Vector(x, y, MAIN_PCB_Z - 5.2)))
+
+    # Service-cover M2.5 insert towers.  They stay outside the carrier outline.
+    for x, y in SERVICE_SCREWS:
+        case = case.fuse(Part.makeCylinder(3.2, 6.2, App.Vector(x, y, FLOOR_T)))
+        case = case.cut(Part.makeCylinder(1.9, 5.2, App.Vector(x, y, 3.4)))
+
+    if split_features:
+        # Two recessed bottom straps make the A1-sized halves self-aligning and
+        # serviceable.  Their bosses stop well below all hot-swap envelopes.
+        for y in (58.0, 84.0):
+            recess = Part.makeBox(32.4, 11.0, 1.55, App.Vector(126.675, y - 5.5, -0.05))
+            case = case.cut(recess)
+            for x in (134.375, 151.375):
+                case = case.fuse(Part.makeCylinder(3.6, 5.8, App.Vector(x, y, FLOOR_T)))
+                case = case.cut(Part.makeCylinder(1.9, 5.0, App.Vector(x, y, 3.2)))
+    return case.removeSplitter()
+
+
+def service_cover_shape():
+    ox, oy, ow, oh = SERVICE_OUTER
+    sx, sy, sw, sh = SERVICE_OPEN
+    flange = rounded_prism(ox + 0.20, oy + 0.20, ow - 0.40, oh - 0.40, 2.0, 0, 1.15)
+    plug = rounded_prism(sx + 0.20, sy + 0.20, sw - 0.40, sh - 0.40, 1.8, 1.15, 1.20)
+    cover = flange.fuse(plug)
+
+    # Carrier mounting posts; carrier F.Cu faces the cover, so the large
+    # opening exposes the onboard BOOT/RESET controls after assembly.
+    for x, y in CARRIER_HOLES:
+        cover = cover.fuse(Part.makeCylinder(2.8, CARRIER_Z - 2.35, App.Vector(x, y, 2.35)))
+        cover = cover.cut(Part.makeCylinder(1.6, 4.8, App.Vector(x, y, CARRIER_Z - 4.7)))
+    access = rounded_prism(132.8, -6.2, 20.2, 25.1, 1.8, -0.2, 3.0)
+    cover = cover.cut(access)
+    for x, y in SERVICE_SCREWS:
+        cover = cover.cut(Part.makeCylinder(1.45, 3.0, App.Vector(x, y, -0.2)))
+        cover = cover.cut(Part.makeCylinder(2.8, 0.9, App.Vector(x, y, -0.05)))
+    return cover.removeSplitter()
+
+
+def carrier_shape():
+    return Part.makeBox(40, 36, CARRIER_T,
+                        App.Vector(CARRIER_ORIGIN[0], CARRIER_ORIGIN[1], CARRIER_Z))
+
+
+def component_envelopes(keys):
+    sockets = []
+    diodes = []
+    for key in keys:
+        x, y, row = key[0], key[1], key[2]
+        if row == 0:
+            sockets.append(Part.makeBox(7.0, 16.0, 2.8, App.Vector(x - 3.5, y - 8.0, MAIN_PCB_Z - 2.8)))
+            dx, dy = x + 2.0, y - 7.6
+        else:
+            sockets.append(Part.makeBox(14.0, 6.0, 2.8, App.Vector(x - 7.0, y - 3.0, MAIN_PCB_Z - 2.8)))
+            dx, dy = x - 7.65, y + 4.6
+        diodes.append(Part.makeBox(4.2, 2.4, 2.0, App.Vector(dx - 2.1, dy - 1.2, MAIN_PCB_Z - 2.0)))
+    main_ffc = Part.makeBox(23.2, 7.0, 2.6, App.Vector(131.275, 0.20, MAIN_PCB_Z - 2.6))
+    return Part.makeCompound(sockets + diodes + [main_ffc])
+
+
+def stabilizer_envelopes(keys):
+    """Conservative plate-mount stabilizer wire/clip space above the PCB."""
+    solids = []
+    for x, y, _row, width_u in keys:
+        if width_u < 2.0:
+            continue
+        span = min(width_u * 19.05 - 8.0, 34.0)
+        solids.append(Part.makeBox(span, 5.0, 2.4,
+                                   App.Vector(x - span / 2, y - 2.5,
+                                              MAIN_PCB_Z + PCB_T + 0.8)))
+    return Part.makeCompound(solids)
+
+
+def assembled_spacers():
+    solids = []
+    for x, y in MAIN_MOUNTS:
+        outer = Part.makeCylinder(3.0, PLATE_GAP, App.Vector(x, y, MAIN_PCB_Z + PCB_T))
+        inner = Part.makeCylinder(1.45, PLATE_GAP + 0.2,
+                                  App.Vector(x, y, MAIN_PCB_Z + PCB_T - 0.1))
+        solids.append(outer.cut(inner))
+    return Part.makeCompound(solids)
+
+
+def controller_envelopes():
+    # RP2040-Zero and USB-C are on F.Cu (down); the FFC is on B.Cu (up).
+    rp = Part.makeBox(18.0, 23.5, 4.0,
+                      App.Vector(CARRIER_ORIGIN[0] + 11.0,
+                                 CARRIER_ORIGIN[1] + 1.5,
+                                 CARRIER_Z - 4.0))
+    usb = Part.makeBox(12.0, 5.8, 4.2,
+                       App.Vector(CARRIER_ORIGIN[0] + 15.67,
+                                  CARRIER_ORIGIN[1] + 0.30,
+                                  CARRIER_Z - 4.2))
+    ffc = Part.makeBox(23.2, 7.0, 2.6,
+                       App.Vector(CARRIER_ORIGIN[0] + 8.4,
+                                  CARRIER_ORIGIN[1] + 28.8,
+                                  CARRIER_Z + CARRIER_T))
+    return Part.makeCompound([rp, usb, ffc])
+
+
+def parse_keys():
+    import re
+    import sys
+    sys.path.insert(0, str(ROOT / "tools"))
+    from generate_hardware import parse_kle
+    return [(key.x, key.y, key.row, key.w) for key in parse_kle(ROOT / "KLE.txt")]
+
+
+def spacer_shape():
+    outer = Part.makeCylinder(3.0, PLATE_GAP)
+    inner = Part.makeCylinder(1.45, PLATE_GAP + 0.2, App.Vector(0, 0, -0.1))
+    return outer.cut(inner)
+
+
+def joiner_shape():
+    bar = rounded_prism(0, 0, 32.0, 10.6, 1.3, 0, 1.50)
+    for x in (7.7, 24.7):
+        bar = bar.cut(Part.makeCylinder(1.45, 2.0, App.Vector(x, 5.3, -0.2)))
+        bar = bar.cut(Part.makeCylinder(2.8, 0.8, App.Vector(x, 5.3, -0.05)))
+    return bar
+
+
+def export_shape(name, shape, stl=True):
+    if shape.isNull() or not shape.isValid():
+        raise RuntimeError(f"Invalid FreeCAD shape: {name}")
+    doc = App.newDocument(name)
+    obj = doc.addObject("Part::Feature", name)
+    obj.Label = name
+    obj.Shape = shape
+    doc.recompute()
+    doc.saveAs(str(OUT / f"{name}.FCStd"))
+    Part.export([obj], str(OUT / f"{name}.step"))
+    if stl:
+        Mesh.export([obj], str(OUT / f"{name}.stl"))
+    volume = shape.Volume
+    App.closeDocument(doc.Name)
+    return {"valid": True, "volume_mm3": round(volume, 3),
+            "bounds_mm": [round(shape.BoundBox.XLength, 3),
+                           round(shape.BoundBox.YLength, 3),
+                           round(shape.BoundBox.ZLength, 3)]}
+
+
+def export_assembly(name, objects):
+    doc = App.newDocument(name)
+    exported = []
+    for label, shape in objects:
+        obj = doc.addObject("Part::Feature", label)
+        obj.Label = label
+        obj.Shape = shape
+        exported.append(obj)
+    doc.recompute()
+    doc.saveAs(str(OUT / f"{name}.FCStd"))
+    Part.export(exported, str(OUT / f"{name}.step"))
+    Mesh.export(exported, str(OUT / f"{name}.stl"))
+    App.closeDocument(doc.Name)
+
+
+def write_corrected_dxf(path, contours):
+    rows = ["0", "SECTION", "2", "HEADER", "0", "ENDSEC",
+            "0", "SECTION", "2", "ENTITIES"]
+    for contour in contours:
+        for (ax, ay), (bx, by) in zip(contour, contour[1:]):
+            rows += ["0", "LINE", "8", "0", "10", f"{ax:.6f}", "20", f"{ay:.6f}",
+                     "30", "0.0", "11", f"{bx:.6f}", "21", f"{by:.6f}", "31", "0.0"]
+    rows += ["0", "ENDSEC", "0", "EOF"]
+    path.write_text("\n".join(rows) + "\n", encoding="ascii")
+
+
+def main():
+    OUT.mkdir(parents=True, exist_ok=True)
+    BUILD.mkdir(exist_ok=True)
+    contours, corrected_dxf_contours = repaired_plate_contours()
+    plate = plate_shape(contours)
+    case = case_shape(False)
+    cover = service_cover_shape()
+    pcb = moved(simplified_main_pcb(), App.Vector(0, 0, MAIN_PCB_Z))
+    carrier = carrier_shape()
+    keys = parse_keys()
+    main_components = component_envelopes(keys)
+    stabilizers = stabilizer_envelopes(keys)
+    spacers = assembled_spacers()
+    ctrl_components = controller_envelopes()
+    # 20 mm cable plus 0.275 mm side clearance.  Connector hold-down tabs sit
+    # outside this flexible-cable envelope and do not travel through the bay.
+    ffc_corridor = Part.makeBox(20.55, 51.0, 13.2, App.Vector(132.60, -6.0, 3.0))
+
+    centre = PCB_CX
+    left_box = Part.makeBox(400, 200, 50, App.Vector(-100, -30, -5))
+    right_box = Part.makeBox(400, 200, 50, App.Vector(centre, -30, -5))
+    left_box = left_box.common(Part.makeBox(centre + 100, 200, 50, App.Vector(-100, -30, -5)))
+    split_case = case_shape(True)
+
+    report = {"artifacts": {}}
+    artifacts = report["artifacts"]
+    artifacts["plate_full"] = export_shape("Minilite64_plate_print_fixed", plate)
+    artifacts["plate_left"] = export_shape("Minilite64_plate_print_left", plate.common(left_box))
+    artifacts["plate_right"] = export_shape("Minilite64_plate_print_right", plate.common(right_box))
+    artifacts["case_full"] = export_shape("Minilite64_case_full", case)
+    artifacts["case_left"] = export_shape("Minilite64_case_A1_left", split_case.common(left_box))
+    artifacts["case_right"] = export_shape("Minilite64_case_A1_right", split_case.common(right_box))
+    artifacts["service_cover"] = export_shape("Minilite64_service_cover", cover)
+    artifacts["plate_spacer"] = export_shape("Minilite64_plate_spacer_print_5x", spacer_shape())
+    artifacts["split_joiner"] = export_shape("Minilite64_case_joiner_print_2x", joiner_shape())
+
+    export_assembly("Minilite64_assembly_review", [
+        ("Case", case), ("ServiceCover", cover), ("MainPCB", pcb),
+        ("Plate", moved(plate, App.Vector(0, 0, PLATE_Z))),
+        ("MainComponents", main_components), ("Stabilizers", stabilizers),
+        ("PlateSpacers", spacers), ("CarrierPCB", carrier),
+        ("ControllerComponents", ctrl_components),
+    ])
+    write_corrected_dxf(OUT / "Minilite64_plate_fixed.dxf", corrected_dxf_contours)
+
+    boss_collision = main_components.common(main_bosses()).Volume
+    main_to_controller = main_components.common(carrier.fuse(ctrl_components)).Volume
+    controller_to_case = carrier.fuse(ctrl_components).common(case).Volume
+    cover_to_case = cover.common(case).Volume
+    pcb_to_case = pcb.common(case).Volume
+    placed_plate = moved(plate, App.Vector(0, 0, PLATE_Z))
+    plate_to_case = placed_plate.common(case).Volume
+    stabilizer_to_spacer = stabilizers.common(spacers).Volume
+    ffc_corridor_to_case = ffc_corridor.common(case).Volume
+    ffc_corridor_to_boss = ffc_corridor.common(main_bosses()).Volume
+    inner_x0, inner_x1 = -0.30, 286.05
+    inner_y0, inner_y1 = -0.30, 95.55
+    keycap_clearances = []
+    for x, y, _row, width_u in keys:
+        half_w = (width_u * 19.05 - 0.8) / 2
+        half_h = (19.05 - 0.8) / 2
+        keycap_clearances.extend([
+            x - half_w - inner_x0, inner_x1 - (x + half_w),
+            y - half_h - inner_y0, inner_y1 - (y + half_h),
+        ])
+    report["assembly"] = {
+        "main_pcb_bottom_z_mm": MAIN_PCB_Z,
+        "plate_bottom_z_mm": PLATE_Z,
+        "case_top_z_mm": CASE_TOP,
+        "ffc_minimum_bend_radius_mm": 6.0,
+        "reserved_ffc_corridor_mm": [132.60, -6.0, 153.15, 45.0, 3.0, 16.2],
+        "main_component_to_mount_boss_intersection_mm3": round(boss_collision, 6),
+        "main_component_to_controller_intersection_mm3": round(main_to_controller, 6),
+        "controller_to_case_intersection_mm3": round(controller_to_case, 6),
+        "service_cover_to_case_intersection_mm3": round(cover_to_case, 6),
+        "main_pcb_to_case_intersection_mm3": round(pcb_to_case, 6),
+        "plate_to_case_intersection_mm3": round(plate_to_case, 6),
+        "stabilizer_to_spacer_intersection_mm3": round(stabilizer_to_spacer, 6),
+        "ffc_corridor_to_case_intersection_mm3": round(ffc_corridor_to_case, 6),
+        "ffc_corridor_to_mount_boss_intersection_mm3": round(ffc_corridor_to_boss, 6),
+        "minimum_keycap_to_inner_wall_xy_clearance_mm": round(min(keycap_clearances), 3),
+        "wall_top_to_keycap_skirt_vertical_clearance_mm": round(
+            PLATE_Z + PLATE_T + 3.0 - CASE_TOP, 3),
+        "bottom_row_conflicting_screw_relief_removed": True,
+        "round_main_mounts": MAIN_ROUND_HOLES,
+        "side_main_mounts": MAIN_EDGE_SLOTS,
+        "carrier_mounts": CARRIER_HOLES,
+    }
+    (BUILD / "mechanical_review.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    print(json.dumps(report, indent=2))
+
+
+if __name__ == "__main__":
+    main()

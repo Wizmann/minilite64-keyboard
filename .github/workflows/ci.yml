@@ -1,0 +1,87 @@
+name: Minilite64 CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  release-validation:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate checked-in release artifacts
+        run: python tools/validate_release.py
+
+  pcb-drc:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install KiCad 10
+        run: |
+          sudo add-apt-repository --yes ppa:kicad/kicad-10.0-releases
+          sudo apt-get update
+          sudo apt-get install --yes kicad
+      - name: Run main PCB DRC
+        run: kicad-cli pcb drc hardware/keyboard/Minilite64.kicad_pcb -o main-ci-drc.rpt --exit-code-violations
+      - name: Run carrier DRC
+        run: kicad-cli pcb drc hardware/controller/RP2040_Zero_Carrier.kicad_pcb -o carrier-ci-drc.rpt --exit-code-violations
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pcb-drc-reports
+          path: "*-ci-drc.rpt"
+
+  mechanical:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FreeCAD
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes freecad
+      - name: Regenerate mechanical package
+        run: >-
+          freecadcmd -c "p='${{ github.workspace }}/tools/generate_mechanical.py';
+          exec(compile(open(p, encoding='utf-8').read(), p, 'exec'),
+          {'__file__': p, '__name__': '__main__'})"
+      - name: Re-run release checks
+        run: python3 tools/validate_release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mechanical-stl-and-dxf
+          path: |
+            hardware/mechanical/*.stl
+            hardware/mechanical/Minilite64_plate_fixed.dxf
+
+  vial-firmware:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ARM and Python build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes gcc-arm-none-eabi libnewlib-arm-none-eabi make git python3-venv
+          python3 -m venv .venv
+          .venv/bin/pip install qmk
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Check out Vial-QMK
+        run: git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/vial-kb/vial-qmk.git vial-qmk
+      - name: Install Vial-QMK Python requirements
+        run: .venv/bin/pip install -r vial-qmk/requirements.txt
+      - name: Add Minilite64 and build UF2
+        run: |
+          cp -a firmware/vial-qmk/keyboards/minilite64 vial-qmk/keyboards/
+          cd vial-qmk
+          make minilite64:vial -j2
+      - name: Collect firmware
+        run: |
+          mkdir -p firmware-output
+          find vial-qmk -maxdepth 1 -type f -name '*minilite64*.uf2' -exec cp {} firmware-output/ \;
+          test -n "$(find firmware-output -type f -name '*.uf2' -print -quit)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: minilite64-vial-uf2
+          path: firmware-output/*.uf2

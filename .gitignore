@@ -1,0 +1,28 @@
+# Local build trees and downloaded toolchains
+build/*
+!build/hardware_metadata.json
+!build/main_final_drc.rpt
+!build/controller_final_drc.rpt
+!build/mechanical_review.json
+!build/plate_fixed_analysis.json
+
+# Application state and caches
+**/__pycache__/
+*.pyc
+*.kicad_prl
+*.FCBak
+.history/
+logs/
+
+# QMK local output
+*.elf
+*.hex
+*.map
+*.uf2
+!firmware/releases/*.uf2
+.build/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/

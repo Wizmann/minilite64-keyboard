@@ -1,0 +1,7 @@
+Ref,Val,Package,PosX,PosY,Rot,Side
+"J1","20P 1.0mm FFC ZIF bottom-contact","FFC_20P_1.0mm_BottomContact_Back",0.000000,0.000000,0.000000,bottom
+"H1","M2.5 clearance","MountingHole_2.2mm",3.000000,-3.000000,0.000000,top
+"H2","M2.5 clearance","MountingHole_2.2mm",37.000000,-3.000000,0.000000,top
+"H3","M2.5 clearance","MountingHole_2.2mm",3.000000,-33.000000,0.000000,top
+"H4","M2.5 clearance","MountingHole_2.2mm",37.000000,-33.000000,0.000000,top
+"U1","Waveshare RP2040-Zero","Waveshare_RP2040_Zero_Castellated",0.000000,0.000000,0.000000,top

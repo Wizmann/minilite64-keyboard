@@ -1,0 +1,153 @@
+{
+  "artifacts": {
+    "plate_full": {
+      "valid": true,
+      "volume_mm3": 19253.289,
+      "bounds_mm": [
+        285.374,
+        94.926,
+        1.5
+      ]
+    },
+    "plate_left": {
+      "valid": true,
+      "volume_mm3": 9602.079,
+      "bounds_mm": [
+        142.687,
+        94.926,
+        1.5
+      ]
+    },
+    "plate_right": {
+      "valid": true,
+      "volume_mm3": 9651.21,
+      "bounds_mm": [
+        142.687,
+        94.926,
+        1.5
+      ]
+    },
+    "case_full": {
+      "valid": true,
+      "volume_mm3": 141536.04,
+      "bounds_mm": [
+        293.75,
+        109.25,
+        27.5
+      ]
+    },
+    "case_left": {
+      "valid": true,
+      "volume_mm3": 70865.247,
+      "bounds_mm": [
+        146.875,
+        109.25,
+        27.5
+      ]
+    },
+    "case_right": {
+      "valid": true,
+      "volume_mm3": 70319.358,
+      "bounds_mm": [
+        146.875,
+        109.25,
+        27.5
+      ]
+    },
+    "service_cover": {
+      "valid": true,
+      "volume_mm3": 3940.895,
+      "bounds_mm": [
+        53.65,
+        40.8,
+        8.0
+      ]
+    },
+    "plate_spacer": {
+      "valid": true,
+      "volume_mm3": 108.346,
+      "bounds_mm": [
+        6.0,
+        5.998,
+        5.0
+      ]
+    },
+    "split_joiner": {
+      "valid": true,
+      "volume_mm3": 459.771,
+      "bounds_mm": [
+        32.0,
+        10.6,
+        1.5
+      ]
+    }
+  },
+  "assembly": {
+    "main_pcb_bottom_z_mm": 18.0,
+    "plate_bottom_z_mm": 24.6,
+    "case_top_z_mm": 27.5,
+    "ffc_minimum_bend_radius_mm": 6.0,
+    "reserved_ffc_corridor_mm": [
+      132.6,
+      -6.0,
+      153.15,
+      45.0,
+      3.0,
+      16.2
+    ],
+    "main_component_to_mount_boss_intersection_mm3": 0.0,
+    "main_component_to_controller_intersection_mm3": 0.0,
+    "controller_to_case_intersection_mm3": 0.0,
+    "service_cover_to_case_intersection_mm3": 0.0,
+    "main_pcb_to_case_intersection_mm3": 0.0,
+    "plate_to_case_intersection_mm3": 0.0,
+    "stabilizer_to_spacer_intersection_mm3": 0.0,
+    "ffc_corridor_to_case_intersection_mm3": 0.0,
+    "ffc_corridor_to_mount_boss_intersection_mm3": 0.0,
+    "minimum_keycap_to_inner_wall_xy_clearance_mm": 0.7,
+    "wall_top_to_keycap_skirt_vertical_clearance_mm": 1.6,
+    "bottom_row_conflicting_screw_relief_removed": true,
+    "round_main_mounts": [
+      [
+        25.5749577,
+        28.2247775
+      ],
+      [
+        128.5759577,
+        47.6255775
+      ],
+      [
+        260.4244577,
+        28.2247775
+      ]
+    ],
+    "side_main_mounts": [
+      [
+        3.65,
+        56.824
+      ],
+      [
+        282.1,
+        56.824
+      ]
+    ],
+    "carrier_mounts": [
+      [
+        125.875,
+        -4.3
+      ],
+      [
+        159.875,
+        -4.3
+      ],
+      [
+        125.875,
+        25.7
+      ],
+      [
+        159.875,
+        25.7
+      ]
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "key_count": 64,
+  "row_counts": [
+    14,
+    14,
+    13,
+    12,
+    11
+  ],
+  "plate": {
+    "width": 285.3739,
+    "height": 94.926,
+    "thickness": 1.5,
+    "material": "PC or FR4"
+  },
+  "main_board": {
+    "width": 285.75,
+    "height": 95.25,
+    "rear_tongue_depth": 0.0,
+    "mount_holes": [
+      [
+        25.5749577,
+        28.224777500000002
+      ],
+      [
+        128.5759577,
+        47.6255775
+      ],
+      [
+        260.4244577,
+        28.224777500000002
+      ]
+    ],
+    "edge_mount_slots": [
+      [
+        3.65,
+        56.824
+      ],
+      [
+        282.1,
+        56.824
+      ]
+    ],
+    "bottom_row_conflicting_mount_removed": true
+  },
+  "controller_board": {
+    "width": 40.0,
+    "height": 36.0,
+    "mount_holes": [
+      [
+        3.0,
+        3.0
+      ],
+      [
+        37.0,
+        3.0
+      ],
+      [
+        3.0,
+        33.0
+      ],
+      [
+        37.0,
+        33.0
+      ]
+    ]
+  },
+  "ffc": {
+    "positions": 20,
+    "pitch": 1.0,
+    "length": 80,
+    "type": "A / same-side",
+    "minimum_bend_radius": 6.0
+  }
+}

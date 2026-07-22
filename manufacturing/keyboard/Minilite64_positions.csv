@@ -1,0 +1,133 @@
+Ref,Val,Package,PosX,PosY,Rot,Side
+"J1","20P 1.0mm FFC ZIF bottom-contact","FFC_20P_1.0mm_BottomContact_Back",0.000000,0.000000,0.000000,bottom
+"D1","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D2","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D3","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D4","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D5","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D6","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D7","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D8","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D9","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D10","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D11","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D12","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D13","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D14","1N4148W SOD-123","SOD-123_HandSolder_Horizontal",0.000000,0.000000,0.000000,top
+"D15","1N4148W SOD-123","SOD-123_HandSolder",6.637500,-28.575000,0.000000,top
+"D16","1N4148W SOD-123","SOD-123_HandSolder",30.450000,-28.575000,0.000000,top
+"D17","1N4148W SOD-123","SOD-123_HandSolder",49.500000,-28.575000,0.000000,top
+"D18","1N4148W SOD-123","SOD-123_HandSolder",68.550000,-28.575000,0.000000,top
+"D19","1N4148W SOD-123","SOD-123_HandSolder",87.600000,-28.575000,0.000000,top
+"D20","1N4148W SOD-123","SOD-123_HandSolder",106.650000,-28.575000,0.000000,top
+"D21","1N4148W SOD-123","SOD-123_HandSolder",125.700000,-28.575000,0.000000,top
+"D22","1N4148W SOD-123","SOD-123_HandSolder",144.750000,-28.575000,0.000000,top
+"D23","1N4148W SOD-123","SOD-123_HandSolder",163.800000,-28.575000,0.000000,top
+"D24","1N4148W SOD-123","SOD-123_HandSolder",182.850000,-28.575000,0.000000,top
+"D25","1N4148W SOD-123","SOD-123_HandSolder",201.900000,-28.575000,0.000000,top
+"D26","1N4148W SOD-123","SOD-123_HandSolder",220.950000,-28.575000,0.000000,top
+"D27","1N4148W SOD-123","SOD-123_HandSolder",240.000000,-28.575000,0.000000,top
+"D28","1N4148W SOD-123","SOD-123_HandSolder",263.812500,-28.575000,0.000000,top
+"D29","1N4148W SOD-123","SOD-123_HandSolder",9.018700,-47.625000,0.000000,top
+"D30","1N4148W SOD-123","SOD-123_HandSolder",35.212500,-47.625000,0.000000,top
+"D31","1N4148W SOD-123","SOD-123_HandSolder",54.262500,-47.625000,0.000000,top
+"D32","1N4148W SOD-123","SOD-123_HandSolder",73.312500,-47.625000,0.000000,top
+"D33","1N4148W SOD-123","SOD-123_HandSolder",92.362500,-47.625000,0.000000,top
+"D34","1N4148W SOD-123","SOD-123_HandSolder",111.412500,-47.625000,0.000000,top
+"D35","1N4148W SOD-123","SOD-123_HandSolder",130.462500,-47.625000,0.000000,top
+"D36","1N4148W SOD-123","SOD-123_HandSolder",149.512500,-47.625000,0.000000,top
+"D37","1N4148W SOD-123","SOD-123_HandSolder",168.562500,-47.625000,0.000000,top
+"D38","1N4148W SOD-123","SOD-123_HandSolder",187.612500,-47.625000,0.000000,top
+"D39","1N4148W SOD-123","SOD-123_HandSolder",206.662500,-47.625000,0.000000,top
+"D40","1N4148W SOD-123","SOD-123_HandSolder",225.712500,-47.625000,0.000000,top
+"D41","1N4148W SOD-123","SOD-123_HandSolder",256.668800,-47.625000,0.000000,top
+"D42","1N4148W SOD-123","SOD-123_HandSolder",13.781300,-66.675000,0.000000,top
+"D43","1N4148W SOD-123","SOD-123_HandSolder",44.737500,-66.675000,0.000000,top
+"D44","1N4148W SOD-123","SOD-123_HandSolder",63.787500,-66.675000,0.000000,top
+"D45","1N4148W SOD-123","SOD-123_HandSolder",82.837500,-66.675000,0.000000,top
+"D46","1N4148W SOD-123","SOD-123_HandSolder",101.887500,-66.675000,0.000000,top
+"D47","1N4148W SOD-123","SOD-123_HandSolder",120.937500,-66.675000,0.000000,top
+"D48","1N4148W SOD-123","SOD-123_HandSolder",139.987500,-66.675000,0.000000,top
+"D49","1N4148W SOD-123","SOD-123_HandSolder",159.037500,-66.675000,0.000000,top
+"D50","1N4148W SOD-123","SOD-123_HandSolder",178.087500,-66.675000,0.000000,top
+"D51","1N4148W SOD-123","SOD-123_HandSolder",197.137500,-66.675000,0.000000,top
+"D52","1N4148W SOD-123","SOD-123_HandSolder",216.187500,-66.675000,0.000000,top
+"D53","1N4148W SOD-123","SOD-123_HandSolder",251.906300,-66.675000,0.000000,top
+"D54","1N4148W SOD-123","SOD-123_HandSolder",4.256200,-85.725000,0.000000,top
+"D55","1N4148W SOD-123","SOD-123_HandSolder",28.068800,-85.725000,0.000000,top
+"D56","1N4148W SOD-123","SOD-123_HandSolder",51.881300,-85.725000,0.000000,top
+"D57","1N4148W SOD-123","SOD-123_HandSolder",75.693700,-85.725000,0.000000,top
+"D58","1N4148W SOD-123","SOD-123_HandSolder",113.793800,-85.725000,0.000000,top
+"D59","1N4148W SOD-123","SOD-123_HandSolder",151.893800,-85.725000,0.000000,top
+"D60","1N4148W SOD-123","SOD-123_HandSolder",175.706300,-85.725000,0.000000,top
+"D61","1N4148W SOD-123","SOD-123_HandSolder",197.137500,-85.725000,0.000000,top
+"D62","1N4148W SOD-123","SOD-123_HandSolder",218.568700,-85.725000,0.000000,top
+"D63","1N4148W SOD-123","SOD-123_HandSolder",242.381200,-85.725000,0.000000,top
+"D64","1N4148W SOD-123","SOD-123_HandSolder",266.193800,-85.725000,0.000000,top
+"H1","M2.5 clearance","MountingHole_2.7mm",25.575000,-28.224800,0.000000,top
+"H2","M2.5 clearance","MountingHole_2.7mm",128.576000,-47.625600,0.000000,top
+"H3","M2.5 clearance","MountingHole_2.7mm",260.424500,-28.224800,0.000000,top
+"SW1","Kailh MX hotswap / ~ / `","Kailh_MX_Hotswap",9.525000,-9.525000,180.000000,top
+"SW2","Kailh MX hotswap / ! / 1","Kailh_MX_Hotswap",28.575000,-9.525000,180.000000,top
+"SW3","Kailh MX hotswap / @ / 2","Kailh_MX_Hotswap",47.625000,-9.525000,180.000000,top
+"SW4","Kailh MX hotswap / # / 3","Kailh_MX_Hotswap",66.675000,-9.525000,180.000000,top
+"SW5","Kailh MX hotswap / $ / 4","Kailh_MX_Hotswap",85.725000,-9.525000,180.000000,top
+"SW6","Kailh MX hotswap / % / 5","Kailh_MX_Hotswap",104.775000,-9.525000,180.000000,top
+"SW7","Kailh MX hotswap / ^ / 6","Kailh_MX_Hotswap",123.825000,-9.525000,180.000000,top
+"SW8","Kailh MX hotswap / & / 7","Kailh_MX_Hotswap",142.875000,-9.525000,180.000000,top
+"SW9","Kailh MX hotswap / * / 8","Kailh_MX_Hotswap",161.925000,-9.525000,180.000000,top
+"SW10","Kailh MX hotswap / ( / 9","Kailh_MX_Hotswap",180.975000,-9.525000,180.000000,top
+"SW11","Kailh MX hotswap / ) / 0","Kailh_MX_Hotswap",200.025000,-9.525000,180.000000,top
+"SW12","Kailh MX hotswap / _ / -","Kailh_MX_Hotswap",219.075000,-9.525000,180.000000,top
+"SW13","Kailh MX hotswap / + / =","Kailh_MX_Hotswap",238.125000,-9.525000,180.000000,top
+"SW14","Kailh MX hotswap / Backspace","Kailh_MX_Hotswap",266.700000,-9.525000,180.000000,top
+"SW15","Kailh MX hotswap / Tab","Kailh_MX_Hotswap",14.287500,-28.575000,0.000000,top
+"SW16","Kailh MX hotswap / Q","Kailh_MX_Hotswap",38.100000,-28.575000,0.000000,top
+"SW17","Kailh MX hotswap / W","Kailh_MX_Hotswap",57.150000,-28.575000,0.000000,top
+"SW18","Kailh MX hotswap / E","Kailh_MX_Hotswap",76.200000,-28.575000,0.000000,top
+"SW19","Kailh MX hotswap / R","Kailh_MX_Hotswap",95.250000,-28.575000,0.000000,top
+"SW20","Kailh MX hotswap / T","Kailh_MX_Hotswap",114.300000,-28.575000,0.000000,top
+"SW21","Kailh MX hotswap / Y","Kailh_MX_Hotswap",133.350000,-28.575000,0.000000,top
+"SW22","Kailh MX hotswap / U","Kailh_MX_Hotswap",152.400000,-28.575000,0.000000,top
+"SW23","Kailh MX hotswap / I","Kailh_MX_Hotswap",171.450000,-28.575000,0.000000,top
+"SW24","Kailh MX hotswap / O","Kailh_MX_Hotswap",190.500000,-28.575000,0.000000,top
+"SW25","Kailh MX hotswap / P","Kailh_MX_Hotswap",209.550000,-28.575000,0.000000,top
+"SW26","Kailh MX hotswap / { / [","Kailh_MX_Hotswap",228.600000,-28.575000,0.000000,top
+"SW27","Kailh MX hotswap / } / ]","Kailh_MX_Hotswap",247.650000,-28.575000,0.000000,top
+"SW28","Kailh MX hotswap / | / \","Kailh_MX_Hotswap",271.462500,-28.575000,0.000000,top
+"SW29","Kailh MX hotswap / Caps Lock","Kailh_MX_Hotswap",16.668700,-47.625000,0.000000,top
+"SW30","Kailh MX hotswap / A","Kailh_MX_Hotswap",42.862500,-47.625000,0.000000,top
+"SW31","Kailh MX hotswap / S","Kailh_MX_Hotswap",61.912500,-47.625000,0.000000,top
+"SW32","Kailh MX hotswap / D","Kailh_MX_Hotswap",80.962500,-47.625000,0.000000,top
+"SW33","Kailh MX hotswap / F","Kailh_MX_Hotswap",100.012500,-47.625000,0.000000,top
+"SW34","Kailh MX hotswap / G","Kailh_MX_Hotswap",119.062500,-47.625000,0.000000,top
+"SW35","Kailh MX hotswap / H","Kailh_MX_Hotswap",138.112500,-47.625000,0.000000,top
+"SW36","Kailh MX hotswap / J","Kailh_MX_Hotswap",157.162500,-47.625000,0.000000,top
+"SW37","Kailh MX hotswap / K","Kailh_MX_Hotswap",176.212500,-47.625000,0.000000,top
+"SW38","Kailh MX hotswap / L","Kailh_MX_Hotswap",195.262500,-47.625000,0.000000,top
+"SW39","Kailh MX hotswap / : / ;","Kailh_MX_Hotswap",214.312500,-47.625000,0.000000,top
+"SW40","Kailh MX hotswap / " / '","Kailh_MX_Hotswap",233.362500,-47.625000,0.000000,top
+"SW41","Kailh MX hotswap / Enter","Kailh_MX_Hotswap",264.318800,-47.625000,0.000000,top
+"SW42","Kailh MX hotswap / Shift","Kailh_MX_Hotswap",21.431300,-66.675000,0.000000,top
+"SW43","Kailh MX hotswap / Z","Kailh_MX_Hotswap",52.387500,-66.675000,0.000000,top
+"SW44","Kailh MX hotswap / X","Kailh_MX_Hotswap",71.437500,-66.675000,0.000000,top
+"SW45","Kailh MX hotswap / C","Kailh_MX_Hotswap",90.487500,-66.675000,0.000000,top
+"SW46","Kailh MX hotswap / V","Kailh_MX_Hotswap",109.537500,-66.675000,0.000000,top
+"SW47","Kailh MX hotswap / B","Kailh_MX_Hotswap",128.587500,-66.675000,0.000000,top
+"SW48","Kailh MX hotswap / N","Kailh_MX_Hotswap",147.637500,-66.675000,0.000000,top
+"SW49","Kailh MX hotswap / M","Kailh_MX_Hotswap",166.687500,-66.675000,0.000000,top
+"SW50","Kailh MX hotswap / < / ,","Kailh_MX_Hotswap",185.737500,-66.675000,0.000000,top
+"SW51","Kailh MX hotswap / > / .","Kailh_MX_Hotswap",204.787500,-66.675000,0.000000,top
+"SW52","Kailh MX hotswap / ? / /","Kailh_MX_Hotswap",223.837500,-66.675000,0.000000,top
+"SW53","Kailh MX hotswap / Shift","Kailh_MX_Hotswap",259.556300,-66.675000,0.000000,top
+"SW54","Kailh MX hotswap / Ctrl","Kailh_MX_Hotswap",11.906200,-85.725000,0.000000,top
+"SW55","Kailh MX hotswap / Win","Kailh_MX_Hotswap",35.718800,-85.725000,0.000000,top
+"SW56","Kailh MX hotswap / Alt","Kailh_MX_Hotswap",59.531200,-85.725000,0.000000,top
+"SW57","Kailh MX hotswap / Fn1","Kailh_MX_Hotswap",83.343800,-85.725000,0.000000,top
+"SW58","Kailh MX hotswap / ","Kailh_MX_Hotswap",121.443800,-85.725000,0.000000,top
+"SW59","Kailh MX hotswap / Fn2","Kailh_MX_Hotswap",159.543800,-85.725000,0.000000,top
+"SW60","Kailh MX hotswap / Menu","Kailh_MX_Hotswap",183.356300,-85.725000,0.000000,top
+"SW61","Kailh MX hotswap / Fn3","Kailh_MX_Hotswap",204.787500,-85.725000,0.000000,top
+"SW62","Kailh MX hotswap / Alt","Kailh_MX_Hotswap",226.218800,-85.725000,0.000000,top
+"SW63","Kailh MX hotswap / Win","Kailh_MX_Hotswap",250.031200,-85.725000,0.000000,top
+"SW64","Kailh MX hotswap / Ctrl","Kailh_MX_Hotswap",273.843800,-85.725000,0.000000,top
