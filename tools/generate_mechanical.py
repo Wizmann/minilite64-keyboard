@@ -80,6 +80,24 @@ SERVICE_OUTER = (115.90, -2.70, 54.05, 40.20)
 SERVICE_OPEN = (117.45, -1.60, 50.95, 37.95)
 SERVICE_SCREWS = [(118.9, 0.1), (166.9, 0.1), (118.9, 34.9), (166.9, 34.9)]
 
+# Four pads define a stable support plane and tolerate print warp better than
+# six hard points.  These pockets target common Ø10 x 1.5-2.0 mm self-adhesive
+# silicone feet.  The radial clearance allows for placement error, while the
+# shallow tapered mouth prints cleanly when the A1 model is standing upright.
+FOOT_PAD_NOMINAL_D = 10.0
+FOOT_RECESS_D = 11.2
+FOOT_RECESS_OPEN_D = 12.0
+FOOT_RECESS_DEPTH = 0.65
+FOOT_RECESS_CHAMFER_H = 0.45
+FOOT_EDGE_INSET_X = 18.0
+FOOT_EDGE_INSET_Y = 16.0
+FOOT_RECESS_CENTRES = [
+    (CASE_X + FOOT_EDGE_INSET_X, CASE_Y + FOOT_EDGE_INSET_Y),
+    (CASE_X + CASE_W - FOOT_EDGE_INSET_X, CASE_Y + FOOT_EDGE_INSET_Y),
+    (CASE_X + FOOT_EDGE_INSET_X, CASE_Y + CASE_H - FOOT_EDGE_INSET_Y),
+    (CASE_X + CASE_W - FOOT_EDGE_INSET_X, CASE_Y + CASE_H - FOOT_EDGE_INSET_Y),
+]
+
 
 def pkey(point, places=5):
     return round(point[0], places), round(point[1], places)
@@ -388,6 +406,24 @@ def case_floor_ribs():
     return Part.makeCompound(ribs)
 
 
+def foot_recess_cutters():
+    """Shallow, standing-print-friendly pockets in the outside bottom face."""
+    cutters = []
+    body_radius = FOOT_RECESS_D / 2
+    opening_radius = FOOT_RECESS_OPEN_D / 2
+    for x, y in FOOT_RECESS_CENTRES:
+        body = Part.makeCylinder(
+            body_radius, FOOT_RECESS_DEPTH + 0.05,
+            App.Vector(x, y, -0.05),
+        )
+        lead_in = Part.makeCone(
+            opening_radius, body_radius, FOOT_RECESS_CHAMFER_H,
+            App.Vector(x, y, -0.05),
+        )
+        cutters.append(body.fuse(lead_in))
+    return Part.makeCompound(cutters)
+
+
 def case_shape():
     outer = outer_case_prism()
     cavity = rounded_prism(-0.30, -0.30, 286.35, 96.35, 1.2,
@@ -395,6 +431,10 @@ def case_shape():
     rear_cavity = rounded_prism(116.85, -1.80, 51.8, 39.7, 1.5,
                                 FLOOR_T, CASE_REAR_H - FLOOR_T + 0.7)
     case = outer.cut(cavity.fuse(rear_cavity))
+
+    # Recess adhesive feet into the outside bottom without breaking through
+    # the 2.4 mm floor or touching the internal ribs.
+    case = case.cut(foot_recess_cutters())
 
     # Rear USB-C tunnel.  The module receptacle face is about 4 mm inboard and
     # no external controller tongue or case projection is required.
@@ -645,6 +685,12 @@ def main():
         "case_rear_height_mm": round(CASE_REAR_H, 3),
         "case_external_plan_mm": [CASE_W, CASE_H],
         "case_plan_corner_radius_mm": CASE_RADIUS,
+        "foot_recess_centres_mm": FOOT_RECESS_CENTRES,
+        "foot_pad_nominal_diameter_mm": FOOT_PAD_NOMINAL_D,
+        "foot_recess_body_diameter_mm": FOOT_RECESS_D,
+        "foot_recess_opening_diameter_mm": FOOT_RECESS_OPEN_D,
+        "foot_recess_depth_mm": FOOT_RECESS_DEPTH,
+        "foot_recess_minimum_floor_mm": FLOOR_T - FOOT_RECESS_DEPTH,
         "ffc_minimum_bend_radius_mm": 6.0,
         "reserved_ffc_corridor_mm": [132.60, -0.2, 153.15, 35.5, 3.0, 22.0],
         "main_component_to_mount_boss_intersection_mm3": round(boss_collision, 6),

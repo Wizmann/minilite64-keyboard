@@ -138,6 +138,13 @@ and its rear controller projection were removed.  The carrier was moved
 forward so the service cover, USB-C tunnel, and R6 FFC corridor all fit inside
 the rectangular exterior.
 
+Four recessed adhesive-foot locations support the case near its corners.
+They target nominal Ø10 x 1.5-2.0 mm silicone pads.  The pocket body is Ø11.2
+x 0.65 mm, providing 0.6 mm radial placement allowance, and the opening grows
+to Ø12 mm through a shallow tapered lead-in.  At least 1.75 mm of the 2.4 mm
+floor remains below each pocket.  Four feet are intentional: additional hard
+support points make a slightly warped print more likely to rock.
+
 The main PCB, plate, spacers, screw axes, and upper post sections share the
 5 degree plane.  Approximate assembled heights are:
 

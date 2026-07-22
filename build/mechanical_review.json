@@ -11,7 +11,7 @@
     },
     "case_full": {
       "valid": true,
-      "volume_mm3": 180583.342,
+      "volume_mm3": 180316.971,
       "bounds_mm": [
         306.817,
         106.317,
@@ -20,7 +20,7 @@
     },
     "case_a1_standing": {
       "valid": true,
-      "volume_mm3": 180583.342,
+      "volume_mm3": 180316.971,
       "bounds_mm": [
         236.26,
         236.26,
@@ -57,6 +57,29 @@
       106.5
     ],
     "case_plan_corner_radius_mm": 5.0,
+    "foot_recess_centres_mm": [
+      [
+        7.375,
+        10.375
+      ],
+      [
+        278.375,
+        10.375
+      ],
+      [
+        7.375,
+        84.875
+      ],
+      [
+        278.375,
+        84.875
+      ]
+    ],
+    "foot_pad_nominal_diameter_mm": 10.0,
+    "foot_recess_body_diameter_mm": 11.2,
+    "foot_recess_opening_diameter_mm": 12.0,
+    "foot_recess_depth_mm": 0.65,
+    "foot_recess_minimum_floor_mm": 1.75,
     "ffc_minimum_bend_radius_mm": 6.0,
     "reserved_ffc_corridor_mm": [
       132.6,

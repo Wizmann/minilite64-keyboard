@@ -35,6 +35,11 @@ envelope.
 The PCB/plate stack and its seven mounting axes follow the 5 degree typing
 plane; the carrier remains horizontal at the bottom for service access.
 
+The bottom has four circular pockets for nominal Ø10 x 1.5-2.0 mm adhesive
+silicone feet.  Each pocket has an Ø11.2 mm body, 0.65 mm depth, and an Ø12 mm
+tapered opening.  The extra diameter tolerates placement error; the shallow
+lead-in avoids a sharp unsupported lip when the case is printed standing.
+
 ## Controller service part
 
 - `Minilite64_service_cover.*` — removable bottom cover carrying the 40 x

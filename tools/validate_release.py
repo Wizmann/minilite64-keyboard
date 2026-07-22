@@ -57,6 +57,14 @@ def main():
             "controller bay escaped the GH60 outside footprint")
     require(not assembly["service_cover_external_button_access"],
             "service cover must not expose BOOT/RESET externally")
+    require(len(assembly["foot_recess_centres_mm"]) == 4,
+            "case must contain four foot recesses")
+    require(assembly["foot_pad_nominal_diameter_mm"] == 10.0,
+            "foot pad diameter changed")
+    require(assembly["foot_recess_body_diameter_mm"] == 11.2,
+            "foot recess placement allowance changed")
+    require(assembly["foot_recess_minimum_floor_mm"] >= 1.7,
+            "foot recess leaves too little case floor")
     mechanical_dir = ROOT / "hardware" / "mechanical"
     forbidden_split_names = (
         "Minilite64_case_A1_left.*", "Minilite64_case_A1_right.*",
