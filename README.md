@@ -11,7 +11,7 @@ lighting.
 - `hardware/keyboard/Minilite64.kicad_pcb` — routed GH60-size main PCB
 - `hardware/controller/RP2040_Zero_Carrier.kicad_pcb` — routed 40 x 36 mm carrier
 - `hardware/mechanical/Minilite64_plate_fixed.dxf` — corrected plate for PC/FR4 ordering
-- `hardware/mechanical/*.stl` and `*.step` — full-size and Bambu A1 split mechanical parts
+- `hardware/mechanical/*.stl` and `*.step` — full-size, A1 standing, and A1 split mechanical parts
 - `manufacturing/*_gerber.zip` — order-ready PCB packages
 - `firmware/vial-qmk/keyboards/minilite64` — Vial-QMK keyboard source
 - `firmware/releases/Minilite64_vial.uf2` — locally verified RP2040 firmware
@@ -29,7 +29,8 @@ recorded in `firmware/releases/SHA256SUMS.txt`.
 Use `hardware/mechanical/Minilite64_plate_fixed.dxf`, not the original
 `plate.dxf`.  The original drawing contains an obsolete screw relief merged
 into the bottom-row Menu switch opening.  The fixed file removes that conflict
-while retaining the three round mounts and two side mounting slots.
+and adds two balanced bottom-row supports, for five round mounts plus two side
+mounting slots in total.
 
 See the [design and reuse guide](docs/DESIGN_AND_REUSE_GUIDE.md) before ordering
 or assembling the first prototype.

@@ -1,5 +1,5 @@
 Drill report for Minilite64.kicad_pcb
-Created on 2026-07-22T15:14:50
+Created on 2026-07-22T17:55:40
 
 Copper Layer Stackup:
     =============================================================
@@ -19,8 +19,9 @@ Drill file 'Minilite64-NPTH.drl' contains
     unplated through holes:
     =============================================================
     T1  1.900mm  0.0748"  (128 holes))
-    T2  2.700mm  0.1063"  (3 holes))
-    T3  3.000mm  0.1181"  (128 holes))
-    T4  4.100mm  0.1614"  (64 holes))
+    T2  2.400mm  0.0945"  (2 holes))
+    T3  2.700mm  0.1063"  (3 holes))
+    T4  3.000mm  0.1181"  (128 holes))
+    T5  4.100mm  0.1614"  (64 holes))
 
-    Total unplated holes count 323
+    Total unplated holes count 325

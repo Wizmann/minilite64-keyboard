@@ -30,6 +30,15 @@ def plate_mount_holes():
     ]
 
 
+def bottom_row_mount_holes():
+    """Balanced M2 supports between adjacent 1.25U bottom-row switches.
+
+    These are deliberately far from the deleted legacy Menu-key relief.  Both
+    axes sit in full plate material and clear the hot-swap/diode envelopes.
+    """
+    return [(47.625, 85.20), (238.125, 85.20)]
+
+
 def edge_mount_slots():
     """Return the screw axes of the two valid DXF edge mounting notches."""
     return [(3.65, 56.824), (282.10, 56.824)]
@@ -391,13 +400,14 @@ def build(keys: list[Key], out):
         "B.Cu", fan_width,
     )
 
-    for index, point in enumerate(plate_mount_holes(), 1):
-        mounting_hole(board, f"H{index}", point)
+    round_holes = plate_mount_holes() + bottom_row_mount_holes()
+    for index, point in enumerate(round_holes, 1):
+        mounting_hole(board, f"H{index}", point, 2.7 if index <= 3 else 2.4)
 
     board.text("MINILITE64 • REV B • 2 LAYER", (142.875, 92.2), "F.SilkS", 1.0)
     add_openai_branding(board)
     board.write(out)
-    return plate_mount_holes()
+    return round_holes
 
 
 if __name__ == "__main__":

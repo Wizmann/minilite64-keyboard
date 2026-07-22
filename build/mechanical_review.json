@@ -2,7 +2,7 @@
   "artifacts": {
     "plate_full": {
       "valid": true,
-      "volume_mm3": 19253.289,
+      "volume_mm3": 19229.23,
       "bounds_mm": [
         285.374,
         94.926,
@@ -11,7 +11,7 @@
     },
     "plate_left": {
       "valid": true,
-      "volume_mm3": 9602.079,
+      "volume_mm3": 9590.05,
       "bounds_mm": [
         142.687,
         94.926,
@@ -20,7 +20,7 @@
     },
     "plate_right": {
       "valid": true,
-      "volume_mm3": 9651.21,
+      "volume_mm3": 9639.181,
       "bounds_mm": [
         142.687,
         94.926,
@@ -29,29 +29,38 @@
     },
     "case_full": {
       "valid": true,
-      "volume_mm3": 144908.463,
+      "volume_mm3": 180583.342,
       "bounds_mm": [
-        295.0,
-        105.0,
-        31.036
+        306.817,
+        106.317,
+        31.835
+      ]
+    },
+    "case_a1_standing": {
+      "valid": true,
+      "volume_mm3": 180583.342,
+      "bounds_mm": [
+        236.26,
+        236.26,
+        106.317
       ]
     },
     "case_left": {
       "valid": true,
-      "volume_mm3": 72481.309,
+      "volume_mm3": 90395.492,
       "bounds_mm": [
-        147.5,
-        105.0,
-        31.036
+        153.409,
+        106.317,
+        31.835
       ]
     },
     "case_right": {
       "valid": true,
-      "volume_mm3": 72075.72,
+      "volume_mm3": 89815.129,
       "bounds_mm": [
-        147.5,
-        105.0,
-        31.036
+        153.409,
+        106.317,
+        31.835
       ]
     },
     "service_cover": {
@@ -83,14 +92,14 @@
     }
   },
   "assembly": {
-    "main_pcb_bottom_z_mm": 20.8,
-    "plate_bottom_z_mm": 27.400000000000002,
-    "case_typing_angle_deg": 6.0,
-    "case_front_height_mm": 20.0,
-    "case_rear_height_mm": 31.036,
+    "main_pcb_bottom_z_mm": 22.0,
+    "plate_bottom_z_mm": 28.6,
+    "case_typing_angle_deg": 5.0,
+    "case_front_height_mm": 22.9,
+    "case_rear_height_mm": 32.218,
     "case_external_plan_mm": [
-      295.0,
-      105.0
+      307.0,
+      106.5
     ],
     "case_plan_corner_radius_mm": 5.0,
     "ffc_minimum_bend_radius_mm": 6.0,
@@ -127,6 +136,14 @@
       [
         260.4244577,
         28.2247775
+      ],
+      [
+        47.625,
+        85.2
+      ],
+      [
+        238.125,
+        85.2
       ]
     ],
     "side_main_mounts": [

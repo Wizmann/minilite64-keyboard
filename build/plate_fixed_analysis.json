@@ -1,5 +1,5 @@
 {
-  "line_count": 1530,
+  "line_count": 1626,
   "bounds": [
     0.09508,
     0.22875,
@@ -10,8 +10,8 @@
     285.37392,
     94.92604999999999
   ],
-  "component_count": 68,
-  "closed_component_count": 68,
+  "component_count": 70,
+  "closed_component_count": 70,
   "components": [
     {
       "edge_count": 30,
@@ -827,6 +827,30 @@
       ],
       "width": 4.998200000000001,
       "height": 5.001000000000005,
+      "closed": true
+    },
+    {
+      "edge_count": 48,
+      "bbox": [
+        45.93204,
+        8.516775,
+        49.13204,
+        11.716775
+      ],
+      "width": 3.200000000000003,
+      "height": 3.1999999999999993,
+      "closed": true
+    },
+    {
+      "edge_count": 48,
+      "bbox": [
+        236.43204,
+        8.516775,
+        239.63204,
+        11.716775
+      ],
+      "width": 3.1999999999999886,
+      "height": 3.1999999999999993,
       "closed": true
     }
   ]

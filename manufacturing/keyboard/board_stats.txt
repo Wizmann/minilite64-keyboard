@@ -1,6 +1,6 @@
 PCB statistics report
 =====================
-- Date: 2026/7/22 15:14:52
+- Date: 2026/7/22 17:55:41
 - Project: Minilite64
 - Board name: Minilite64
 
@@ -9,23 +9,23 @@ Board
 - Width: 285.4500 mm
 - Height: 94.9500 mm
 - Area: 27049.165 mm²
-- Front copper area: 2691.644 mm²
-- Back copper area: 4347.686 mm²
+- Front copper area: 2700.589 mm²
+- Back copper area: 4356.631 mm²
 - Min track clearance: 0.2000 mm
 - Min track width: 0.2000 mm
 - Min drill diameter: 0.3000 mm
 - Board stackup thickness: 1.6000 mm
 
-- Front footprint area: 2102.586 mm²
-- Back footprint area: 2102.586 mm²
-- Front component density: 7.77 %
-- Back component density: 7.77 %
+- Front footprint area: 2111.537 mm²
+- Back footprint area: 2111.537 mm²
+- Front component density: 7.81 %
+- Back component density: 7.81 %
 Pads
 ----
 - Through hole: 0
 - SMD: 278
 - Connector: 0
-- NPTH: 323
+- NPTH: 325
 - Castellated: 0
 - Press-fit: 0
 
@@ -43,8 +43,8 @@ Components
 |--------------|------------|-----------|-------|
 |THT:          |          0 |         0 |     0 |
 |SMD:          |        128 |         1 |   129 |
-|Unspecified:  |          3 |         0 |     3 |
-|Total:        |        131 |         1 |   132 |
+|Unspecified:  |          5 |         0 |     5 |
+|Total:        |        133 |         1 |   134 |
 
 Drill holes
 -----------
@@ -56,3 +56,4 @@ Drill holes
 |   113 | Round | 0.3000 mm | 0.3000 mm |    PTH |     Via |        F.Cu |       B.Cu |
 |    64 | Round | 4.1000 mm | 4.1000 mm |   NPTH |     Pad |        F.Cu |       B.Cu |
 |     3 | Round | 2.7000 mm | 2.7000 mm |   NPTH |     Pad |        F.Cu |       B.Cu |
+|     2 | Round | 2.4000 mm | 2.4000 mm |   NPTH |     Pad |        F.Cu |       B.Cu |

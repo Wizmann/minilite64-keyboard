@@ -466,7 +466,7 @@ def mounting_hole(board: Board, ref: str, point, diameter=2.7):
         f'  (footprint "MountingHole_{fmt(diameter)}mm" (layer "F.Cu") (at {fmt(point[0])} {fmt(point[1])})',
         f'    (uuid {uid(ref + "-fp")})',
         property_text("Reference", ref, (0, 3.3), "F.Fab", uid(ref + "-ref")),
-        property_text("Value", "M2.5 clearance", (0, 0), "F.Fab", uid(ref + "-val"), True),
+        property_text("Value", "M2 clearance", (0, 0), "F.Fab", uid(ref + "-val"), True),
         pad(board, "", "np_thru_hole", "circle", (0, 0), (diameter, diameter), ["*.Cu", "*.Mask"], drill=diameter),
         '  )',
     ]
@@ -935,7 +935,13 @@ def write_controller_legacy_schematic(path: Path):
 
 
 def write_project(path: Path):
-    path.write_text(json.dumps({"meta": {"filename": path.name, "version": 1}}, indent=2), encoding="utf-8")
+    # KiCad expands this seed with board rules and editor settings.  Preserve
+    # that real project configuration on subsequent hardware regenerations.
+    if not path.exists():
+        path.write_text(
+            json.dumps({"meta": {"filename": path.name, "version": 1}}, indent=2),
+            encoding="utf-8",
+        )
 
 
 def write_bom(keys: list[Key], root: Path):
@@ -947,8 +953,8 @@ def write_bom(keys: list[Key], root: Path):
         ["J1 (main), J1 (carrier)", 2, "20P 1.0mm bottom-contact flip-lock FFC/FPC connector", "20P 1.0mm SMT", "Hand solder", "Generic or equivalent; verify same footprint"],
         ["FFC1", 1, "20P 1.0mm Type-A FFC, 80mm", "Same-side contacts", "Purchased cable", "Minimum installed bend radius 6mm"],
         ["U1", 1, "Waveshare RP2040-Zero 23.5x18mm USB-C", "Castellated module", "Hand solder", "Mount component-side up; USB toward rear"],
-        ["H1-H3 main", 3, "M2.5 screw + heat-set insert", "Mechanical", "Assembly", "Three closed DXF mounting holes"],
-        ["S1-S2 main sides", 2, "M2.5 screw + heat-set insert", "Mechanical", "Assembly", "Left/right DXF edge slots; screw heads retain PCB and plate"],
+        ["H1-H5 main", 5, "M2 screw + 3.2x3mm heat-set insert", "Mechanical", "Assembly", "Three original mounts plus two balanced bottom-row supports"],
+        ["S1-S2 main sides", 2, "M2 screw + 3.2x3mm heat-set insert", "Mechanical", "Assembly", "Left/right DXF edge slots; screw heads retain PCB and plate"],
         ["H1-H4 carrier", 4, "M2 screw + heat-set insert", "Mechanical", "Assembly", "Four-corner mounting"],
     ]
     with (root / "BOM.csv").open("w", newline="", encoding="utf-8-sig") as f:

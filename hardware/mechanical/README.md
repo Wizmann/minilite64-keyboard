@@ -18,19 +18,24 @@ not a single printable part.
 
 ## Case
 
-- `Minilite64_case_full.*` — one-piece case for a printer or machine with a
-  build area larger than the Bambu A1.  It uses a strict GH60-style 295 x
-  105 mm rectangular plan, R5 plan corners, and a 6 degree wedge.  The front
-  height is 20 mm and the rear height is 31.036 mm.  There is no controller
-  tongue or rear projection.
+- `Minilite64_case_full.*` — one-piece case in assembled orientation.  It uses
+  a 307 x 106.5 mm Linhai/Case.step-inspired GH60-style plan, R5 plan corners,
+  a 5 degree wedge, a 22.9 mm front, and a 32.218 mm rear.  The tapered wall,
+  R2 hand-contact rim, C1.2 lower edge break, and internal ribs follow the
+  supplied references.  There is no controller tongue or rear projection.
+- `Minilite64_case_A1_standing.*` — the same one-piece case rotated onto its
+  front wall and 45 degrees across the bed.  Its stored bounds are about
+  236.3 x 236.3 x 106.3 mm, so it fits the Bambu A1 with room for an
+  approximately 8 mm brim.  Use this file for the preferred one-piece print.
 - `Minilite64_case_A1_left.*` — left half of the Bambu A1 printable case.
 - `Minilite64_case_A1_right.*` — right half of the Bambu A1 printable case.
 - `Minilite64_case_joiner_print_2x.*` — bottom joining strap; print two copies
   to connect the A1 left/right case halves.
 
 The RP2040 carrier, service cover, USB-C tunnel, and R6 FFC corridor are custom
-internal features.  They do not change the canonical GH60 outside envelope.
-The PCB/plate stack and its five mounting axes follow the 6 degree typing
+internal features.  They do not change the selected rectangular outside
+envelope.
+The PCB/plate stack and its seven mounting axes follow the 5 degree typing
 plane; the carrier remains horizontal at the bottom for service access.
 
 ## Controller service part
@@ -47,10 +52,11 @@ plane; the carrier remains horizontal at the bottom for service access.
   large printer.  It is primarily a fit-check model.
 - `Minilite64_plate_print_left.*` — left Bambu A1-sized plate test half.
 - `Minilite64_plate_print_right.*` — right Bambu A1-sized plate test half.
-- `Minilite64_plate_spacer_print_5x.*` — 5 mm plate-to-PCB spacer; print five
+- `Minilite64_plate_spacer_print_7x.*` — 5 mm plate-to-PCB spacer; print seven
   copies, one at each retained mounting location.
 
 The original root-level `plate.dxf` is preserved for provenance.  Do not send
 it to manufacturing: it contains an obsolete screw relief merged into the
 bottom-row Menu switch opening.  The files in this directory remove that
-collision while retaining the three round mounts and two side mounting slots.
+collision and add two symmetric bottom-row supports.  The finished plate has
+five round mounts and two side mounting slots.

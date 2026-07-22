@@ -64,9 +64,11 @@ Ref,Val,Package,PosX,PosY,Rot,Side
 "D62","1N4148W SOD-123","SOD-123_HandSolder",218.568700,-85.725000,0.000000,top
 "D63","1N4148W SOD-123","SOD-123_HandSolder",242.381200,-85.725000,0.000000,top
 "D64","1N4148W SOD-123","SOD-123_HandSolder",266.193800,-85.725000,0.000000,top
-"H1","M2.5 clearance","MountingHole_2.7mm",25.575000,-28.224800,0.000000,top
-"H2","M2.5 clearance","MountingHole_2.7mm",128.576000,-47.625600,0.000000,top
-"H3","M2.5 clearance","MountingHole_2.7mm",260.424500,-28.224800,0.000000,top
+"H1","M2 clearance","MountingHole_2.7mm",25.575000,-28.224800,0.000000,top
+"H2","M2 clearance","MountingHole_2.7mm",128.576000,-47.625600,0.000000,top
+"H3","M2 clearance","MountingHole_2.7mm",260.424500,-28.224800,0.000000,top
+"H4","M2 clearance","MountingHole_2.4mm",47.625000,-85.200000,0.000000,top
+"H5","M2 clearance","MountingHole_2.4mm",238.125000,-85.200000,0.000000,top
 "SW1","Kailh MX hotswap / ~ / `","Kailh_MX_Hotswap",9.525000,-9.525000,180.000000,top
 "SW2","Kailh MX hotswap / ! / 1","Kailh_MX_Hotswap",28.575000,-9.525000,180.000000,top
 "SW3","Kailh MX hotswap / @ / 2","Kailh_MX_Hotswap",47.625000,-9.525000,180.000000,top

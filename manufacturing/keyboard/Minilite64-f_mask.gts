@@ -1,12 +1,12 @@
 %TF.GenerationSoftware,KiCad,Pcbnew,10.0.4*%
-%TF.CreationDate,2026-07-22T15:14:50+08:00*%
+%TF.CreationDate,2026-07-22T17:55:39+08:00*%
 %TF.ProjectId,Minilite64,4d696e69-6c69-4746-9536-342e6b696361,rev?*%
 %TF.SameCoordinates,Original*%
 %TF.FileFunction,Soldermask,Top*%
 %TF.FilePolarity,Negative*%
 %FSLAX46Y46*%
 G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
-G04 Created by KiCad (PCBNEW 10.0.4) date 2026-07-22 15:14:50*
+G04 Created by KiCad (PCBNEW 10.0.4) date 2026-07-22 17:55:39*
 %MOMM*%
 %LPD*%
 G01*
@@ -15,6 +15,7 @@ G04 APERTURE LIST*
 %ADD11C,1.900000*%
 %ADD12C,3.000000*%
 %ADD13C,2.700000*%
+%ADD14C,2.400000*%
 G04 APERTURE END LIST*
 D10*
 %TO.C,SW1*%
@@ -665,5 +666,12 @@ X128576000Y-47625600D03*
 %TD*%
 %TO.C,H3*%
 X260424500Y-28224800D03*
+%TD*%
+D14*
+%TO.C,H4*%
+X47625000Y-85200000D03*
+%TD*%
+%TO.C,H5*%
+X238125000Y-85200000D03*
 %TD*%
 M02*

@@ -20,7 +20,8 @@ requirements are:
 - A 20-position, 1.0 mm Type-A/same-side FFC, nominally 80 mm long.
 - Vial/VIA remapping, four dynamic layers, Bootmagic, and a firmware boot key.
 - A PC or FR4 plate, 1.5 mm thick, plus printable verification plates.
-- A printable tray case, a bottom service cover, and Bambu A1-sized split parts.
+- A Case.step-inspired wedge case, a bottom service cover, a one-piece Bambu
+  A1 standing print, and split files as a fallback.
 
 ## 2. Electrical architecture
 
@@ -39,15 +40,19 @@ The switch matrix has five rows and fourteen columns.  Diode direction is
 | 2-6 | ROW0-ROW4 | GP29, GP28, GP27, GP26, GP15 |
 | 7-20 | COL0-COL13 | GP13 through GP0 in the order recorded in `manufacturing/FFC_pinout.csv` |
 
-The final main board includes five usable mounting locations:
+The final main board includes seven usable mounting locations:
 
-- Round mounts: `(25.57496, 28.22478)`, `(128.57596, 47.62558)`, and
+- Original round mounts: `(25.57496, 28.22478)`, `(128.57596, 47.62558)`, and
   `(260.42446, 28.22478)` mm.
+- Balanced bottom-row M2 mounts: `(47.625, 85.20)` and `(238.125, 85.20)` mm.
 - Side-slot screw axes: `(3.65, 56.824)` and `(282.10, 56.824)` mm.
 
 The bottom-row screw relief near the Menu key is deliberately absent.  It
 overlapped the switch opening and would have collided with the switch/hot-swap
-assembly.
+assembly.  The two replacement mounts are symmetric about the keyboard center,
+sit in full material between adjacent 1.25U switches, and avoid the spacebar
+stabilizer.  The PCB uses 2.4 mm NPTH holes at these new locations; the plate
+uses 3.2 mm clearance holes.
 
 ### RP2040-Zero carrier
 
@@ -79,8 +84,8 @@ pcb_y = pcb_center_y - (dxf_y - dxf_center_y)
 The original DXF contains 68 closed connected contours, but one switch contour
 has 33 segments because an obsolete circular screw relief was merged into the
 bottom-row Menu opening.  The corrected file replaces that merged contour with
-a normal MX opening.  The corrected DXF still has 68 closed contours, but no
-33-segment internal contour.
+a normal MX opening and adds the two bottom-row clearance holes.  The corrected
+DXF has 70 closed contours and no 33-segment internal contour.
 
 Always order the plate from:
 
@@ -111,46 +116,59 @@ Keep the original `plate.dxf` only as provenance.
 ## 5. Mechanical architecture
 
 GH60 defines a PCB and mounting ecosystem, not one official case shell.  The
-case exterior therefore uses dimensions cross-checked against several open
-sources:
+case exterior therefore combines the supplied references with the GH60 PCB
+datum:
 
 - The original [GH60 project](https://github.com/komar007/gh60) supplies the
   PCB and mounting datum.
-- [ejans/GH60-Case](https://github.com/ejans/GH60-Case) supplies the nominal
-  295 x 105 mm outside plan, 285 x 95 mm inside plan, and R5 plan corners.
-- [cheuksing/OS60](https://github.com/cheuksing/OS60) and
-  [mitaroThanken/Case60](https://github.com/mitaroThanken/Case60) independently
-  use a 6 degree GH60 typing plane.
+- The supplied Linhai GH60 3MF supplies the 307 x 106.5 mm outside plan and its
+  proven 45 degree standing-print strategy.
+- The supplied `Case.step` measures approximately 303.64 x 115.22 x 33.47 mm.
+  Its main profile is about 22.91 mm at the front and 32.06 mm at the rear,
+  with a 5 degree typing plane, tapered walls, rounded hand-contact edges, and
+  triangulated internal ribs.
 
-The resulting Minilite64 case is a strict 295 x 105 mm rectangle with R5 plan
-corners, a 20 mm front, a 31.036 mm rear, and a 6 degree wedge.  The previous
-flat 293.75 x 103.25 mm tray and its rear controller projection were removed.
-The carrier was moved forward so the service cover, USB-C tunnel, and R6 FFC
-corridor all fit inside the GH60 exterior.
+The resulting Minilite64 case uses a nominal 307 x 106.5 mm GH60-style plan,
+R5 plan corners, a 22.9 mm front, a 32.218 mm rear, and a 5 degree wedge.  It
+adds a 2.5 mm wall taper, an R2 upper edge, and a C1.2 lower edge break so the
+printed shell does not leave a sharp hand-contact edge.  The previous flat tray
+and its rear controller projection were removed.  The carrier was moved
+forward so the service cover, USB-C tunnel, and R6 FFC corridor all fit inside
+the rectangular exterior.
 
 The main PCB, plate, spacers, screw axes, and upper post sections share the
-6 degree plane.  Approximate assembled heights are:
+5 degree plane.  Approximate assembled heights are:
 
 | Item | Rear datum | Front datum |
 |---|---:|---:|
 | Case floor | 0-2.4 mm | 0-2.4 mm |
 | Carrier PCB | 8.0-9.6 mm | horizontal |
-| Main PCB bottom | 20.8 mm | 10.86 mm |
-| Plate bottom | 27.36 mm | 17.43 mm |
-| Case rim | 30.52 mm | 20.53 mm |
+| Main PCB bottom | 22.0 mm | 13.68 mm |
+| Plate bottom | 28.6 mm | 20.28 mm |
+| Case rim | 32.218 mm exterior | 22.9 mm exterior |
 
-The full outside extrema are 31.036 mm at the rear edge and 20 mm at the front
-edge.  These values differ slightly from the PCB-edge datums in the table.
+The height values at the PCB edges differ slightly from the case exterior-edge
+values because the PCB is inset from the front and rear walls.
 
 The 80 mm FFC must be stored as a broad S-shaped loop in the reserved center
 bay.  Keep every bend at or above R6, keep the cable inside the documented
 20.55 mm-wide corridor, and never crease it at either ZIF mouth.  Insert and
 lock the FFC before tightening the main PCB.
 
-The full case and full plate exceed the Bambu A1's 256 x 256 mm build area.
-Use the `*_A1_left.stl` and `*_A1_right.stl` case halves, two printed joiner
-straps, and the left/right plate verification halves.  The uncut files are for
-larger printers or machining.
+The assembled-orientation case is 307 mm long, but the one-piece
+`Minilite64_case_A1_standing.stl` is stored front-wall-down and rotated 45
+degrees.  Its approximate slicer bounds are 236.3 x 236.3 x 106.3 mm, leaving
+room for an approximately 8 mm brim on the Bambu A1.  Use the standing file as
+the preferred one-piece print.  The `*_A1_left.stl` and `*_A1_right.stl` case
+halves and two joiner straps remain as a lower-risk fallback.  The full and
+split plate files are primarily fit-check models; order the final plate in
+1.5 mm PC or FR4 from the corrected DXF.
+
+For the standing case, keep the stored orientation, add an 8-10 mm brim, and
+inspect the slicer's support preview around the horizontal insert bosses,
+service opening, and internal ribs.  Do not scale the model to make it fit.
+First print a short cropped test or one split half to tune insert-pilot and
+screw clearances for the chosen filament before committing to the full print.
 
 ## 6. Mechanical checks performed
 
@@ -163,14 +181,17 @@ zero:
 - Controller assembly versus the case.
 - Service cover versus the case.
 - Main PCB and plate versus case walls.
-- Plate-mount stabilizer envelopes versus the five plate spacers.
+- Plate-mount stabilizer envelopes versus the seven plate spacers.
 - FFC corridor versus the case and mounting bosses.
 
 The hot-swap keep-outs initially collided with three full-diameter posts.  The
-final posts use a wide lower body below component height and a 4.8 mm neck
-between sockets.  Their axes now follow the 6 degree PCB normal.  The
-service-cover screw towers were also moved outside the 40 mm carrier outline
-after the first solid-intersection pass found an overlap.
+final main posts use a wide lower body below component height and normally a
+6 mm upper boss.  The legacy center location retains a 4.8 mm neck because a
+6 mm neck intersects its socket envelope.  Each main boss has a 2.8 mm pilot
+for a short M2 heat-set insert with nominal 3.2 mm OD and 3 mm length.  Their
+axes follow the 5 degree PCB normal.  The service-cover screw towers were also
+moved outside the 40 mm carrier outline after the first solid-intersection pass
+found an overlap.
 
 These checks are envelope checks, not a substitute for a physical prototype.
 Print the split plate first, install representative switches, sockets,
@@ -188,10 +209,14 @@ stabilizers, screws, and an actual FFC, then print the case.
    window.
 7. Insert and lock the FFC at the carrier, route a broad R6-or-larger S loop,
    and lock the main-board end.
-8. Install five 5 mm plate spacers, the main PCB, plate, plate stabilizers, and
-   switches.  Do not use the deleted bottom-row screw location.
-9. Check the FFC through the open service bay, then install the cover.
-10. Flash the UF2 and perform a full matrix test before fitting keycaps.
+8. Heat-set the seven main M2 inserts with a temperature-controlled tip.  Keep
+   each insert square to the tilted boss and stop flush; do not force it deeper
+   than the 3 mm insert length.
+9. Install seven 5 mm plate spacers, the main PCB, plate, plate stabilizers, and
+   switches.  Use the two new symmetric bottom-row supports, not the deleted
+   Menu-key screw location.
+10. Check the FFC through the open service bay, then install the cover.
+11. Flash the UF2 and perform a full matrix test before fitting keycaps.
 
 For normal remapping, use Vial.  The physical BOOT/RESET buttons should rarely
 be needed after the first flash.  The default Fn1 layer provides `QK_BOOT` on
@@ -256,6 +281,11 @@ python tools/validate_release.py
   production batch; generic 20P 1.0 mm connectors are not mechanically
   interchangeable.
 - Buy a same-side/Type-A 20P 1.0 mm FFC and enforce R6 during installation.
+- Confirm M2 heat-set inserts are 3.2 mm nominal OD and 3 mm long before
+  heating them into the 2.8 mm case pilots; tune the pilot on a test coupon if
+  the actual insert knurl differs.
+- For the A1 one-piece case, use the stored standing orientation and an
+  8-10 mm brim; review supports before slicing.
 - Print one plate half and a service-cover/carrier test before the full case.
 - Test all 64 switch positions, USB enumeration, Vial unlock, and the boot key.
 - Only after the prototype passes should the case tolerances be tuned for the

@@ -4,9 +4,10 @@ Run with FreeCAD's Python, for example:
     freecadcmd.exe tools/generate_mechanical.py
 
 The supplied plate DXF contains one obsolete screw relief merged into the
-bottom-row Menu switch opening.  This generator repairs that contour before
-making the printable plate and corrected manufacturing DXF.  The three round
-mounting holes and the two side mounting notches remain.
+bottom-row Menu switch opening.  This generator repairs that contour and adds
+two balanced M2 supports between bottom-row keys before making the printable
+plate and corrected manufacturing DXF.  The original three round mounting
+holes and the two side mounting notches remain.
 """
 
 from __future__ import annotations
@@ -28,39 +29,43 @@ BUILD = ROOT / "build"
 PCB_X0, PCB_Y0 = 0.15, 0.15
 PCB_X1, PCB_Y1 = 285.60, 95.10
 PCB_CX, PCB_CY = (PCB_X0 + PCB_X1) / 2, (PCB_Y0 + PCB_Y1) / 2
-MAIN_ROUND_HOLES = [
+ORIGINAL_MAIN_ROUND_HOLES = [
     (25.5749577, 28.2247775),
     (128.5759577, 47.6255775),
     (260.4244577, 28.2247775),
 ]
+BOTTOM_ROW_MOUNT_HOLES = [(47.625, 85.20), (238.125, 85.20)]
+MAIN_ROUND_HOLES = ORIGINAL_MAIN_ROUND_HOLES + BOTTOM_ROW_MOUNT_HOLES
 MAIN_EDGE_SLOTS = [(3.65, 56.824), (282.10, 56.824)]
 MAIN_MOUNTS = MAIN_ROUND_HOLES + MAIN_EDGE_SLOTS
 
 # Canonical GH60 enclosure reference used by this project:
 #   * 285 x 94.6 mm GH60 PCB datum
-#   * 295 x 105 mm outside plan, R5 plan corners
-#   * 6 degree typing angle
-# The plan dimensions are taken from the open-source ejans/GH60-Case model;
-# the 6 degree wedge is shared by OS60 and Case60.  Unlike the previous tray,
-# the controller bay now stays inside this strict rectangular footprint.
-CASE_W, CASE_H = 295.0, 105.0
+#   * 307 x 106.5 mm Linhai-style outside plan, R5 plan corners
+#   * 5 degree typing angle and a 22.9/32.2 mm front/rear profile
+# The proportions follow the supplied Linhai 3MF and Case.step references.
+# Unlike the previous tray, the controller bay remains inside the body.
+CASE_W, CASE_H = 307.0, 106.5
 CASE_X = PCB_CX - CASE_W / 2
 CASE_Y = PCB_CY - CASE_H / 2
 CASE_RADIUS = 5.0
-CASE_ANGLE_DEG = 6.0
-CASE_FRONT_H = 20.0
+CASE_ANGLE_DEG = 5.0
+CASE_FRONT_H = 22.9
 CASE_REAR_H = CASE_FRONT_H + CASE_H * math.tan(math.radians(CASE_ANGLE_DEG))
+CASE_SIDE_INSET = 2.5
+CASE_TOP_FILLET = 2.0
+CASE_BOTTOM_CHAMFER = 1.2
 FLOOR_T = 2.4
-# Local stack datum at PCB y=0.  The whole PCB/plate stack is rotated -6
-# degrees about this line so it remains parallel with the sloped GH60 rim.
-MAIN_PCB_Z = 20.8
+# Local stack datum at PCB y=0.  The whole PCB/plate stack follows the
+# five-degree Case.step typing plane.
+MAIN_PCB_Z = 22.0
 PCB_T = 1.6
 PLATE_GAP = 5.0
 PLATE_T = 1.5
 PLATE_Z = MAIN_PCB_Z + PCB_T + PLATE_GAP
 
 # The controller is centred at the rear but remains entirely inside the
-# canonical 295 x 105 mm GH60 footprint.  Its USB-C receptacle faces the rear
+# selected 307 x 106.5 mm GH60-style footprint.  Its USB-C receptacle faces the rear
 # wall and the FFC exits toward the main PCB without a tight fold.
 CARRIER_ORIGIN = (122.875, -1.00)
 CARRIER_Z = 8.0
@@ -177,6 +182,22 @@ def repaired_plate_contours():
     x0, y0, x1, y1 = bounds(outer)
     dxf_cx, dxf_cy = (x0 + x1) / 2, (y0 + y1) / 2
 
+    # Add two Ø3.2 mm plate holes in the full-material gaps between adjacent
+    # 1.25U bottom-row switches.  They are symmetric about the keyboard centre
+    # and deliberately avoid the deleted Menu-key relief.
+    for pcb_x, pcb_y in BOTTOM_ROW_MOUNT_HOLES:
+        dxf_x = pcb_x - PCB_CX + dxf_cx
+        dxf_y = dxf_cy + PCB_CY - pcb_y
+        radius = 1.6
+        circle = [
+            (
+                dxf_x + radius * math.cos(2 * math.pi * i / 48),
+                dxf_y + radius * math.sin(2 * math.pi * i / 48),
+            )
+            for i in range(49)
+        ]
+        inner.append(circle)
+
     def to_pcb(contour):
         return [
             (x + PCB_CX - dxf_cx, PCB_CY - (y - dxf_cy))
@@ -263,12 +284,35 @@ def rounded_prism(x, y, width, height, radius, z0, depth):
     return result.removeSplitter()
 
 
+def rounded_rectangle_wire(x, y, width, height, radius, z):
+    """Exact eight-edge rounded rectangle used by the tapered case loft."""
+    radius = min(radius, width / 2, height / 2)
+    point = lambda px, py: App.Vector(px, py, z)
+    normal = App.Vector(0, 0, 1)
+    return Part.Wire([
+        Part.makeLine(point(x + radius, y), point(x + width - radius, y)),
+        Part.makeCircle(radius, point(x + width - radius, y + radius), normal, 270, 360),
+        Part.makeLine(point(x + width, y + radius), point(x + width, y + height - radius)),
+        Part.makeCircle(radius, point(x + width - radius, y + height - radius), normal, 0, 90),
+        Part.makeLine(point(x + width - radius, y + height), point(x + radius, y + height)),
+        Part.makeCircle(radius, point(x + radius, y + height - radius), normal, 90, 180),
+        Part.makeLine(point(x, y + height - radius), point(x, y + radius)),
+        Part.makeCircle(radius, point(x + radius, y + radius), normal, 180, 270),
+    ])
+
+
 def outer_case_prism():
-    """Strict 295 x 105 mm GH60 plan with a six-degree wedge profile."""
-    vertical = rounded_prism(
-        CASE_X, CASE_Y, CASE_W, CASE_H, CASE_RADIUS,
-        0, CASE_REAR_H + 0.5,
+    """Linhai/Case.step-style tapered body with safe hand-contact edges."""
+    lower = rounded_rectangle_wire(
+        CASE_X, CASE_Y, CASE_W, CASE_H, CASE_RADIUS, 0,
     )
+    inset = CASE_SIDE_INSET
+    upper = rounded_rectangle_wire(
+        CASE_X + inset, CASE_Y + inset,
+        CASE_W - 2 * inset, CASE_H - 2 * inset,
+        max(1.0, CASE_RADIUS - inset), CASE_REAR_H + 0.5,
+    )
+    tapered = Part.makeLoft([lower, upper], True, False)
     rear_y = CASE_Y
     front_y = CASE_Y + CASE_H
     side = Part.Face(Part.makePolygon([
@@ -279,7 +323,19 @@ def outer_case_prism():
         App.Vector(CASE_X - 1.0, rear_y, 0),
     ]))
     wedge = side.extrude(App.Vector(CASE_W + 2.0, 0, 0))
-    return vertical.common(wedge).removeSplitter()
+    outer = tapered.common(wedge).removeSplitter()
+
+    # Case.step rounds the hand-contact rim and breaks the lower edge.  Keep
+    # these operations on the external solid before opening the cavity so the
+    # internal functional geometry remains dimensionally predictable.
+    top_edges = [
+        edge for edge in outer.Edges
+        if edge.BoundBox.ZMin >= CASE_FRONT_H - 0.1
+    ]
+    outer = outer.makeFillet(CASE_TOP_FILLET, top_edges)
+    bottom_edges = [edge for edge in outer.Edges if edge.BoundBox.ZMax < 0.01]
+    outer = outer.makeChamfer(CASE_BOTTOM_CHAMFER, bottom_edges)
+    return outer.removeSplitter()
 
 
 def main_bosses():
@@ -287,23 +343,56 @@ def main_bosses():
     normal = stack_normal()
     for x, y in MAIN_MOUNTS:
         # Posts and insert pilots follow the PCB normal.  This keeps screw
-        # heads, PCB holes, and the plate spacers coaxial after the 6 deg tilt.
+        # heads, PCB holes, and the plate spacers coaxial after the 5 deg tilt.
         top = tilted_point(x, y, MAIN_PCB_Z)
         total_h = (top.z - FLOOR_T) / normal.z
         base = top - normal * total_h
         neck_h = min(4.8, total_h - 1.0)
         lower_h = total_h - neck_h
         lower = Part.makeCylinder(3.75, lower_h, base, normal)
-        neck = Part.makeCylinder(2.40, neck_h, base + normal * lower_h, normal)
+        # Case.step uses Ø6 mm upper bosses.  The matching Ø2.8 mm pilot is
+        # sized for a short M2 3.2x3 mm heat-set insert and normally leaves
+        # 1.6 mm of radial polymer.  The legacy centre mount remains Ø4.8 mm
+        # because its socket envelope is tighter; it still retains 1.0 mm.
+        neck_radius = 2.40 if (x, y) == ORIGINAL_MAIN_ROUND_HOLES[1] else 3.00
+        neck = Part.makeCylinder(neck_radius, neck_h,
+                                 base + normal * lower_h, normal)
         result.append(lower.fuse(neck))
     return Part.makeCompound(result)
+
+
+def case_floor_ribs():
+    """Case.step-style triangulated ribs tying the lower mounts together."""
+    paths = [
+        (ORIGINAL_MAIN_ROUND_HOLES[1], ORIGINAL_MAIN_ROUND_HOLES[0]),
+        (ORIGINAL_MAIN_ROUND_HOLES[1], ORIGINAL_MAIN_ROUND_HOLES[2]),
+        (ORIGINAL_MAIN_ROUND_HOLES[1], BOTTOM_ROW_MOUNT_HOLES[0]),
+        (ORIGINAL_MAIN_ROUND_HOLES[1], BOTTOM_ROW_MOUNT_HOLES[1]),
+        (BOTTOM_ROW_MOUNT_HOLES[0], MAIN_EDGE_SLOTS[0]),
+        (BOTTOM_ROW_MOUNT_HOLES[1], MAIN_EDGE_SLOTS[1]),
+    ]
+    ribs = []
+    width = 2.4
+    height = 1.8
+    for (ax, ay), (bx, by) in paths:
+        length = math.hypot(bx - ax, by - ay)
+        rib = Part.makeBox(
+            length, width, height,
+            App.Vector(ax, ay - width / 2, FLOOR_T),
+        )
+        rib.rotate(
+            App.Vector(ax, ay, FLOOR_T), App.Vector(0, 0, 1),
+            math.degrees(math.atan2(by - ay, bx - ax)),
+        )
+        ribs.append(rib)
+    return Part.makeCompound(ribs)
 
 
 def case_shape(split_features=False):
     outer = outer_case_prism()
     cavity = rounded_prism(-0.30, -0.30, 286.35, 96.35, 1.2,
                            FLOOR_T, CASE_REAR_H - FLOOR_T + 0.7)
-    rear_cavity = rounded_prism(116.85, -4.10, 51.8, 42.0, 1.5,
+    rear_cavity = rounded_prism(116.85, -1.80, 51.8, 39.7, 1.5,
                                 FLOOR_T, CASE_REAR_H - FLOOR_T + 0.7)
     case = outer.cut(cavity.fuse(rear_cavity))
 
@@ -319,13 +408,13 @@ def case_shape(split_features=False):
     recess = rounded_prism(ox, oy, ow, oh, 2.2, -0.1, 1.25)
     case = case.cut(through.fuse(recess))
 
-    # Main PCB/plate stack standoffs, with M2.5 heat-set insert pilots.
+    # Main PCB/plate stack standoffs, with M2 heat-set insert pilots.
     bosses = main_bosses()
-    case = case.fuse(bosses)
+    case = case.fuse(bosses).fuse(case_floor_ribs())
     normal = stack_normal()
     for x, y in MAIN_MOUNTS:
         top = tilted_point(x, y, MAIN_PCB_Z)
-        case = case.cut(Part.makeCylinder(2.0, 5.4, top - normal * 5.2, normal))
+        case = case.cut(Part.makeCylinder(1.4, 5.4, top - normal * 5.2, normal))
 
     # Service-cover M2.5 insert towers.  They stay outside the carrier outline.
     for x, y in SERVICE_SCREWS:
@@ -447,6 +536,22 @@ def joiner_shape():
     return bar
 
 
+def standing_print_shape(shape):
+    """Orient the one-piece case like the supplied A1-compatible 3MF.
+
+    The front wall becomes the broad bed-contact face.  A 45 degree in-plane
+    rotation fits the 307 mm length inside the A1's 256 x 256 mm square while
+    keeping the rear USB opening away from the build plate.
+    """
+    result = shape.copy()
+    result.rotate(App.Vector(0, 0, 0), App.Vector(1, 0, 0), -90)
+    result.translate(App.Vector(0, 0, CASE_Y + CASE_H))
+    result.rotate(App.Vector(0, 0, 0), App.Vector(0, 0, 1), 45)
+    bounds = result.BoundBox
+    result.translate(App.Vector(8.0 - bounds.XMin, 8.0 - bounds.YMin, -bounds.ZMin))
+    return result
+
+
 def export_shape(name, shape, stl=True):
     if shape.isNull() or not shape.isValid():
         raise RuntimeError(f"Invalid FreeCAD shape: {name}")
@@ -523,10 +628,13 @@ def main():
     artifacts["plate_left"] = export_shape("Minilite64_plate_print_left", plate.common(left_box))
     artifacts["plate_right"] = export_shape("Minilite64_plate_print_right", plate.common(right_box))
     artifacts["case_full"] = export_shape("Minilite64_case_full", case)
+    artifacts["case_a1_standing"] = export_shape(
+        "Minilite64_case_A1_standing", standing_print_shape(case)
+    )
     artifacts["case_left"] = export_shape("Minilite64_case_A1_left", split_case.common(left_box))
     artifacts["case_right"] = export_shape("Minilite64_case_A1_right", split_case.common(right_box))
     artifacts["service_cover"] = export_shape("Minilite64_service_cover", cover)
-    artifacts["plate_spacer"] = export_shape("Minilite64_plate_spacer_print_5x", spacer_shape())
+    artifacts["plate_spacer"] = export_shape("Minilite64_plate_spacer_print_7x", spacer_shape())
     artifacts["split_joiner"] = export_shape("Minilite64_case_joiner_print_2x", joiner_shape())
 
     export_assembly("Minilite64_assembly_review", [
