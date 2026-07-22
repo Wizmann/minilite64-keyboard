@@ -41,7 +41,8 @@ def main():
 
     review = json.loads((ROOT / "build" / "mechanical_review.json").read_text(encoding="utf-8"))
     require(set(review["artifacts"]) == {
-        "plate_full", "case_full", "case_a1_standing", "service_cover", "plate_spacer",
+        "plate_full", "plate_a1_fitcheck", "case_full", "case_a1_standing",
+        "service_cover", "plate_spacer",
     }, "unexpected or missing mechanical release artifacts")
     assembly = review["assembly"]
     intersection_keys = [key for key in assembly if key.endswith("intersection_mm3")]
@@ -73,6 +74,11 @@ def main():
             "foot recess placement allowance changed")
     require(assembly["foot_recess_minimum_floor_mm"] >= 1.7,
             "foot recess leaves too little case floor")
+    require(abs(float(assembly["plate_a1_joint_total_gap_mm"]) - 0.4) < 1e-6,
+            "A1 fit-check plate joint tolerance changed")
+    fitcheck_bounds = review["artifacts"]["plate_a1_fitcheck"]["bounds_mm"]
+    require(all(float(value) <= 256.0 for value in fitcheck_bounds),
+            f"A1 fit-check plate exceeds build volume: {fitcheck_bounds}")
     mechanical_dir = ROOT / "hardware" / "mechanical"
     forbidden_split_names = (
         "Minilite64_case_A1_left.*", "Minilite64_case_A1_right.*",
@@ -99,6 +105,11 @@ def main():
         require(f'"{layer}"' in carrier, f"carrier missing layer declaration {layer}")
     require(main_board.count('MountingHole_2.7mm') == 3, "main PCB must retain three original round mounts")
     require(main_board.count('MountingHole_2.4mm') == 2, "main PCB must contain two bottom-row M2 mounts")
+    require('PLATE DXF • 1:1 CHECK' in main_board,
+            "main PCB is missing the plate verification silkscreen label")
+    require(main_board.count(
+        '(stroke (width 0.12) (type default)) (layer "F.SilkS")'
+    ) == 1626, "main PCB plate verification silkscreen is incomplete")
     standing = review["artifacts"]["case_a1_standing"]["bounds_mm"]
     require(all(float(value) <= 256.0 for value in standing),
             f"standing one-piece case exceeds Bambu A1 build volume: {standing}")

@@ -20,6 +20,8 @@ lighting.
 Both PCBs currently report zero DRC violations and zero unconnected items.
 The mechanical review reports zero intersections for the checked component,
 mounting, controller, stabilizer, cover, and cable envelopes.
+The main PCB front silkscreen also carries the complete corrected plate DXF at
+1:1 scale for visual Gerber and bare-board inspection.
 
 The checked-in UF2 was built with `arm-none-eabi-gcc 13.2.1`; its SHA-256 is
 recorded in `firmware/releases/SHA256SUMS.txt`.

@@ -93,6 +93,18 @@ Always order the plate from:
 
 `hardware/mechanical/Minilite64_plate_fixed.dxf`
 
+The main PCB front silkscreen reproduces all 1,626 line segments from this
+corrected DXF: outside edge, MX/stabilizer openings, and mounting holes.  This
+is a visual verification layer, not a routing or fabrication boundary.  Check
+it in the Gerber viewer before ordering and compare it directly on the first
+bare PCB.
+
+The outside verification line intentionally follows the 1:1 plate edge only
+0.128 mm from the routed PCB edge after line width is included.  The keyboard
+project therefore ignores only KiCad's silkscreen-to-board-edge warning; all
+copper, hole, connectivity, and other silkscreen checks remain enabled.  The
+branding is on B.Silkscreen so it does not merge with the verification lines.
+
 Keep the original `plate.dxf` only as provenance.
 
 ## 4. Routing lessons
@@ -171,6 +183,13 @@ degrees.  Its approximate slicer bounds are 236.3 x 236.3 x 106.3 mm, leaving
 room for an approximately 8 mm brim on the Bambu A1.  Use the standing file as
 the one-piece print.  The printable full plate is primarily a fit-check model;
 order the final plate in 1.5 mm PC or FR4 from the corrected DXF.
+
+For A1 fit checking, `Minilite64_plate_A1_fitcheck.stl` contains both plate
+halves already laid flat on one bed.  Its stepped seam follows the material
+webs between rows and columns, with 0.4 mm total clearance.  The joint is an
+alignment feature rather than a structural connection: assemble it loosely,
+insert the nearby switches into the PCB, then tighten the plate screws.  Glue
+is unnecessary for dimensional verification.
 
 For the standing case, keep the stored orientation, add an 8-10 mm brim, and
 inspect the slicer's support preview around the horizontal insert bosses,

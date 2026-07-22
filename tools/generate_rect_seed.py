@@ -44,6 +44,40 @@ def edge_mount_slots():
     return [(3.65, 56.824), (282.10, 56.824)]
 
 
+def fixed_plate_silkscreen_segments():
+    """Map every corrected plate DXF segment onto the PCB front silkscreen."""
+    path = ROOT / "hardware" / "mechanical" / "Minilite64_plate_fixed.dxf"
+    raw = path.read_text(encoding="ascii", errors="ignore").splitlines()
+    pairs = [(raw[i].strip(), raw[i + 1].strip()) for i in range(0, len(raw) - 1, 2)]
+    segments = []
+    index = 0
+    while index < len(pairs):
+        if pairs[index] != ("0", "LINE"):
+            index += 1
+            continue
+        fields = {}
+        index += 1
+        while index < len(pairs) and pairs[index][0] != "0":
+            fields[pairs[index][0]] = pairs[index][1]
+            index += 1
+        segments.append((
+            (float(fields["10"]), float(fields["20"])),
+            (float(fields["11"]), float(fields["21"])),
+        ))
+
+    points = [point for segment in segments for point in segment]
+    dxf_cx = (min(x for x, _ in points) + max(x for x, _ in points)) / 2
+    dxf_cy = (min(y for _, y in points) + max(y for _, y in points)) / 2
+    pcb_cx = (0.15 + 285.60) / 2
+    pcb_cy = (0.15 + 95.10) / 2
+
+    def to_pcb(point):
+        x, y = point
+        return x + pcb_cx - dxf_cx, pcb_cy - (y - dxf_cy)
+
+    return [(to_pcb(a), to_pcb(b)) for a, b in segments]
+
+
 def board_outline():
     """GH60 rectangle with the two valid side mounting notches.
 
@@ -404,8 +438,17 @@ def build(keys: list[Key], out):
     for index, point in enumerate(round_holes, 1):
         mounting_hole(board, f"H{index}", point, 2.7 if index <= 3 else 2.4)
 
-    board.text("MINILITE64 • REV B • 2 LAYER", (142.875, 92.2), "F.SilkS", 1.0)
-    add_openai_branding(board)
+    # Keep the front silkscreen dedicated to the 1:1 plate check.  Branding
+    # belongs on the assembled board's visible underside and no longer crosses
+    # the plate verification geometry.
+    board.text(
+        "MINILITE64 • REV B • 2 LAYER", (142.875, 94.1),
+        "B.SilkS", 1.0, "mirror",
+    )
+    add_openai_branding(board, layer="B.SilkS")
+    for a, b in fixed_plate_silkscreen_segments():
+        board.graphic_line(a, b, "F.SilkS", 0.12)
+    board.text("PLATE DXF • 1:1 CHECK", (142.875, 1.0), "F.SilkS", 0.8)
     board.write(out)
     return round_holes
 

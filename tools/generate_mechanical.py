@@ -98,6 +98,25 @@ FOOT_RECESS_CENTRES = [
     (CASE_X + CASE_W - FOOT_EDGE_INSET_X, CASE_Y + CASE_H - FOOT_EDGE_INSET_Y),
 ]
 
+# One STL contains both fit-check halves already arranged on the A1 bed.  The
+# stepped seam follows the web between switch rows/columns instead of slicing
+# through a complete MX opening.  A 0.4 mm total gap gives 0.2 mm clearance
+# per mating side.
+PLATE_JOINT_GAP = 0.40
+PLATE_JOINT_BED_GAP = 6.0
+PLATE_JOINT_BOUNDARY = [
+    (133.350, -10.0),
+    (133.350, 19.050),
+    (142.875, 19.050),
+    (142.875, 38.100),
+    (147.6375, 38.100),
+    (147.6375, 57.150),
+    (138.1125, 57.150),
+    (138.1125, 76.200),
+    (144.500, 76.200),
+    (144.500, 105.0),
+]
+
 
 def pkey(point, places=5):
     return round(point[0], places), round(point[1], places)
@@ -267,6 +286,55 @@ def plate_shape(contours):
     outer = Part.Face(wire(contours[0])).extrude(App.Vector(0, 0, PLATE_T))
     cutters = [Part.Face(wire(c)).extrude(App.Vector(0, 0, PLATE_T + 0.2)) for c in contours[1:]]
     return outer.cut(Part.makeCompound(cutters)).removeSplitter()
+
+
+def plate_a1_fitcheck_shape(plate):
+    """Split on a loose stepped seam and arrange both parts on one A1 bed."""
+    far_left, far_right = -20.0, 310.0
+    low_y, high_y = -10.0, 105.0
+    boundary = PLATE_JOINT_BOUNDARY
+    left_polygon = [
+        (far_left, low_y), *boundary,
+        (far_left, high_y), (far_left, low_y),
+    ]
+    right_polygon = [
+        boundary[0], (far_right, low_y), (far_right, high_y), boundary[-1],
+        *reversed(boundary[:-1]),
+    ]
+    left_region = Part.Face(wire(left_polygon)).extrude(App.Vector(0, 0, PLATE_T))
+    right_region = Part.Face(wire(right_polygon)).extrude(App.Vector(0, 0, PLATE_T))
+
+    # Remove a narrow ribbon around every axis-aligned seam segment.  The
+    # visible gap is deliberate and prevents elephant-foot locking.
+    ribbon_parts = []
+    half_gap = PLATE_JOINT_GAP / 2
+    for (ax, ay), (bx, by) in zip(boundary, boundary[1:]):
+        if abs(ax - bx) < 1e-6:
+            ribbon_parts.append(Part.makeBox(
+                PLATE_JOINT_GAP, abs(by - ay) + PLATE_JOINT_GAP,
+                PLATE_T + 0.2,
+                App.Vector(ax - half_gap, min(ay, by) - half_gap, -0.1),
+            ))
+        else:
+            ribbon_parts.append(Part.makeBox(
+                abs(bx - ax) + PLATE_JOINT_GAP, PLATE_JOINT_GAP,
+                PLATE_T + 0.2,
+                App.Vector(min(ax, bx) - half_gap, ay - half_gap, -0.1),
+            ))
+    printable = plate.cut(Part.makeCompound(ribbon_parts))
+    left = printable.common(left_region).removeSplitter()
+    right = printable.common(right_region).removeSplitter()
+
+    # Both disconnected parts are flat and compact in this slicer-only file.
+    left = moved(left, App.Vector(
+        5.0 - left.BoundBox.XMin, 5.0 - left.BoundBox.YMin, 0,
+    ))
+    right = moved(right, App.Vector(
+        5.0 - right.BoundBox.XMin,
+        5.0 + left.BoundBox.YLength + PLATE_JOINT_BED_GAP - right.BoundBox.YMin,
+        0,
+    ))
+    return Part.makeCompound([left, right])
 
 
 def board_outline_points():
@@ -593,6 +661,22 @@ def export_shape(name, shape, stl=True):
                            round(shape.BoundBox.ZLength, 3)]}
 
 
+def export_stl_only(name, shape):
+    """Export a slicer-only artifact without adding redundant CAD files."""
+    if shape.isNull() or not shape.isValid():
+        raise RuntimeError(f"Invalid FreeCAD shape: {name}")
+    doc = App.newDocument(name)
+    obj = doc.addObject("Part::Feature", name)
+    obj.Shape = shape
+    doc.recompute()
+    Mesh.export([obj], str(OUT / f"{name}.stl"))
+    App.closeDocument(doc.Name)
+    return {"valid": True, "volume_mm3": round(shape.Volume, 3),
+            "bounds_mm": [round(shape.BoundBox.XLength, 3),
+                           round(shape.BoundBox.YLength, 3),
+                           round(shape.BoundBox.ZLength, 3)]}
+
+
 def export_assembly(name, objects):
     doc = App.newDocument(name)
     exported = []
@@ -643,6 +727,9 @@ def main():
     report = {"artifacts": {}}
     artifacts = report["artifacts"]
     artifacts["plate_full"] = export_shape("Minilite64_plate_print_fixed", plate)
+    artifacts["plate_a1_fitcheck"] = export_stl_only(
+        "Minilite64_plate_A1_fitcheck", plate_a1_fitcheck_shape(plate)
+    )
     artifacts["case_full"] = export_shape("Minilite64_case_full", case)
     artifacts["case_a1_standing"] = export_shape(
         "Minilite64_case_A1_standing", standing_print_shape(case)
@@ -698,6 +785,7 @@ def main():
         "foot_recess_opening_diameter_mm": FOOT_RECESS_OPEN_D,
         "foot_recess_depth_mm": FOOT_RECESS_DEPTH,
         "foot_recess_minimum_floor_mm": FLOOR_T - FOOT_RECESS_DEPTH,
+        "plate_a1_joint_total_gap_mm": PLATE_JOINT_GAP,
         "ffc_minimum_bend_radius_mm": 6.0,
         "reserved_ffc_corridor_mm": [132.60, -0.2, 153.15, 35.5, 3.0, MAIN_PCB_Z],
         "main_component_to_mount_boss_intersection_mm3": round(boss_collision, 6),

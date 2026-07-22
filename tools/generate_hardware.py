@@ -302,7 +302,10 @@ def add_openai_branding(board: Board, left=140.125, top=82.975, layer="F.SilkS")
         points = [(left + (x-x0)*scale, top + (y-y0)*scale) for x, y in polygon]
         for a, b in zip(points, points[1:] + points[:1]):
             board.graphic_line(a, b, layer, 0.18)
-    board.text("MINILITE • DESIGNED WITH CODEX", (139.0, 78.5), layer, 0.9)
+    board.text(
+        "MINILITE • DESIGNED WITH CODEX", (139.0, 78.5), layer, 0.9,
+        "mirror" if layer.startswith("B.") else "",
+    )
 
 
 def property_text(name, value, at, layer, ident, hide=False):

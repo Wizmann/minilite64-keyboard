@@ -54,6 +54,10 @@ lead-in avoids a sharp unsupported lip when the case is printed standing.
   fabrication.  This is the DXF to send to the plate vendor.
 - `Minilite64_plate_print_fixed.*` — one-piece, 1.5 mm printable plate for a
   large printer.  It is primarily a fit-check model.
+- `Minilite64_plate_A1_fitcheck.stl` — one A1-ready STL containing two flat
+  printable halves.  The loose stepped joint avoids complete switch openings,
+  uses a 0.4 mm total seam gap, and relies on switches and PCB screws for final
+  alignment.  No glue is required for fit checking.
 - `Minilite64_plate_spacer_print_7x.*` — 5 mm plate-to-PCB spacer; print seven
   copies, one at each retained mounting location.
 

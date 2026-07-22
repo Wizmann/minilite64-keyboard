@@ -9,6 +9,15 @@
         1.5
       ]
     },
+    "plate_a1_fitcheck": {
+      "valid": true,
+      "volume_mm3": 19154.155,
+      "bounds_mm": [
+        152.012,
+        195.852,
+        1.5
+      ]
+    },
     "case_full": {
       "valid": true,
       "volume_mm3": 167720.405,
@@ -80,6 +89,7 @@
     "foot_recess_opening_diameter_mm": 12.0,
     "foot_recess_depth_mm": 0.65,
     "foot_recess_minimum_floor_mm": 1.75,
+    "plate_a1_joint_total_gap_mm": 0.4,
     "ffc_minimum_bend_radius_mm": 6.0,
     "reserved_ffc_corridor_mm": [
       132.6,
