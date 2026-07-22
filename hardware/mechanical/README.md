@@ -29,12 +29,28 @@ not a single printable part.
   236.3 x 236.3 x 106.3 mm, so it fits the Bambu A1 with room for an
   approximately 8 mm brim.  Use this file for the preferred one-piece print.
 
-The RP2040 carrier, service cover, USB-C tunnel, and R6 FFC corridor are custom
-internal features.  They do not change the selected rectangular outside
-envelope.
+The RP2040 carrier, service cover, USB-C tunnel, and rear-wall FFC service-loop
+pocket are custom internal features.  They do not change the selected
+rectangular outside envelope.
 
 The PCB/plate stack and its seven mounting axes follow the 5 degree typing
 plane; the carrier remains horizontal at the bottom for service access.
+
+The 100 mm FFC is a service tether.  Connect and fasten the main PCB first,
+connect the carrier/cover outside the case, then guide the smooth scroll into
+its rounded rear pocket and install the cover screws.  The controller can be
+removed later without disturbing the main PCB.
+
+`Minilite64_assembly_review.*` also contains a named 65 mm controller service
+pose with tangent cable exits.  The modeled service path is 94.762 mm long,
+keeps 5.238 mm slack, reaches R3.6 at the fixed rear hairpin, and keeps the
+cubic drop above R4.82.  The 81.625 mm straight-line value is only a theoretical
+upper bound.  Use an FFC flexible body no thicker than 0.20 mm; the reinforced
+ends may be 0.30 mm.
+
+This package is prototype-only until a real cable has been fitted.  A solid
+model cannot prove that the flexible strip will settle into the ideal scroll
+instead of buckling during cover insertion.
 
 The bottom has four circular pockets for nominal Ø10 x 1.5-2.0 mm adhesive
 silicone feet.  Each pocket has an Ø11.2 mm body, 0.65 mm depth, and an Ø12 mm

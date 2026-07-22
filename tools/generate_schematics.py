@@ -61,7 +61,7 @@ def generate_keyboard():
     schematic.components.add(
         "Connector_Generic:Conn_01x20",
         reference="J1",
-        value="20P 1.0mm FFC Type A",
+        value="20P 1.0mm FFC Type A / main pins straight",
         position=(400.0, 130.0),
         footprint="Minilite:FFC_20P_1.0mm_BottomContact",
         grid_units=False,
@@ -77,7 +77,7 @@ def generate_controller():
     schematic.components.add(
         "Connector_Generic:Conn_01x20",
         reference="J1",
-        value="20P 1.0mm FFC Type A",
+        value="20P 1.0mm FFC Type A / carrier pins straight",
         position=(45.0, 100.0),
         footprint="Minilite:FFC_20P_1.0mm_BottomContact",
         grid_units=False,

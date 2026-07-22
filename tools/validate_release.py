@@ -76,6 +76,44 @@ def main():
             "foot recess leaves too little case floor")
     require(abs(float(assembly["plate_a1_joint_total_gap_mm"]) - 0.4) < 1e-6,
             "A1 fit-check plate joint tolerance changed")
+    require(assembly["ffc_type"] == "A / same-side",
+            "FFC contact orientation changed")
+    require(assembly["ffc_width_mm"] == 21.0 and assembly["ffc_length_mm"] == 100.0,
+            "FFC dimensions changed")
+    require(not assembly["ffc_axial_twist"], "FFC route must not require axial twist")
+    require(float(assembly["ffc_installed_bend_radius_mm"]) >= 3.0,
+            "installed FFC bend radius is too tight")
+    require(float(assembly["ffc_verified_service_pose_travel_mm"]) >= 65.0,
+            "100 mm FFC leaves too little modeled carrier-last assembly travel")
+    require(float(assembly["ffc_verified_service_pose_centerline_length_mm"]) <= 96.0,
+            "tangent-constrained FFC service pose is too close to taut")
+    require(float(assembly["ffc_verified_service_pose_minimum_radius_mm"]) >= 3.5,
+            "tangent-constrained FFC service pose bends too tightly")
+    require(float(assembly["ffc_verified_service_pose_cubic_minimum_radius_mm"]) >= 4.0,
+            "service-pose drop curve bends too tightly")
+    require(assembly["ffc_both_ends_locked_cover_install_allowed"],
+            "carrier-last assembly must remain supported")
+    require(not assembly["ffc_service_requires_main_pcb_release_first"],
+            "carrier service must not require releasing the main PCB")
+    sequence = assembly["ffc_required_assembly_sequence"]
+    require(len(sequence) == 4
+            and "main end" in sequence[0]
+            and "carrier end" in sequence[2],
+            "main-first / carrier-last FFC assembly sequence is missing")
+    require(float(assembly["ffc_rear_wall_skin_mm"]) >= 1.5,
+            "rear cable pocket leaves too little printed case wall")
+    require(4.0 <= float(assembly["ffc_installed_slack_mm"]) <= 12.0,
+            "installed FFC has an implausible amount of stored slack")
+    require(float(assembly["ffc_scroll_minimum_actual_layer_gap_mm"]) >= 0.1,
+            "FFC scroll layers do not have enough actual body clearance")
+    require(float(assembly["usb_to_ffc_pocket_web_mm"]) >= 1.2,
+            "USB tunnel to FFC pocket printed web is too thin")
+    require(assembly["physical_ffc_fit_check_required"]
+            and assembly["release_status"].startswith("prototype-only"),
+            "release must remain prototype-only until a real FFC is fitted")
+    corridor = assembly["reserved_ffc_corridor_mm"]
+    require(float(corridor[2]) - float(corridor[0]) >= 22.5,
+            "FFC corridor is too narrow for the 21 mm cable")
     fitcheck_bounds = review["artifacts"]["plate_a1_fitcheck"]["bounds_mm"]
     require(all(float(value) <= 256.0 for value in fitcheck_bounds),
             f"A1 fit-check plate exceeds build volume: {fitcheck_bounds}")
@@ -110,6 +148,18 @@ def main():
     require(main_board.count(
         '(stroke (width 0.12) (type default)) (layer "F.SilkS")'
     ) == 1626, "main PCB plate verification silkscreen is incomplete")
+    require('(start 131.875 0) (end 153.875 0)' in main_board,
+            "main ZIF mouth is not facing the rear C-bend pocket")
+    require('(pad "1" smd roundrect (at 133.375 3.2)' in main_board
+            and '(net 1 "COL0")' in main_board,
+            "main ZIF left edge must be pin 1 / COL0")
+    require('(pad "20" smd roundrect (at 152.375 3.2)' in main_board
+            and '(net 20 "GND")' in main_board,
+            "main ZIF right edge must be pin 20 / GND")
+    require('(start 9 26.8)' in carrier and '(end 31 26.8)' in carrier,
+            "carrier ZIF mouth is not facing the rear like the main ZIF")
+    require('(at 10.5 30)' in carrier and '(net "COL0")' in carrier,
+            "carrier ZIF pin 1 / COL0 placement changed")
     standing = review["artifacts"]["case_a1_standing"]["bounds_mm"]
     require(all(float(value) <= 256.0 for value in standing),
             f"standing one-piece case exceeds Bambu A1 build volume: {standing}")
@@ -119,9 +169,22 @@ def main():
     metadata = json.loads((ROOT / "build" / "hardware_metadata.json").read_text(encoding="utf-8"))
     require(metadata["main_board"]["mount_holes"][-2:] == expected_bottom_mounts,
             "hardware metadata is missing the bottom-row mounts")
+    require(metadata["ffc"]["type"] == "A / same-side"
+            and metadata["ffc"]["width"] == 21.0
+            and metadata["ffc"]["length"] == 100
+            and metadata["ffc"]["assembly_strategy"] == "main-first / carrier-last"
+            and metadata["ffc"]["both_ends_locked_cover_install_allowed"]
+            and not metadata["ffc"]["axial_twist"],
+            "hardware metadata has the wrong FFC specification")
     drill_report = (ROOT / "manufacturing" / "keyboard" / "drill_report.rpt").read_text(encoding="utf-8")
     require('T2  2.400mm  0.0945"  (2 holes)' in drill_report,
             "manufacturing drill package is missing the two 2.4 mm NPTH mounts")
+    pinout = (ROOT / "manufacturing" / "FFC_pinout.csv").read_text(encoding="utf-8-sig")
+    require("1,1,COL0,GP13" in pinout and "20,20,GND,GND" in pinout,
+            "FFC straight-through endpoint pinout is not documented")
+    bom = (ROOT / "manufacturing" / "BOM.csv").read_text(encoding="utf-8-sig")
+    require("Type-A FFC, 100mm x 21mm" in bom and "Same-side contacts" in bom,
+            "BOM has the wrong FFC contact orientation")
 
     keyboard = json.loads((ROOT / "firmware" / "vial-qmk" / "keyboards" / "minilite64" / "keyboard.json").read_text(encoding="utf-8"))
     require(keyboard["matrix_pins"]["rows"] == ["GP29", "GP28", "GP27", "GP26", "GP15"],

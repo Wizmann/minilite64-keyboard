@@ -3,8 +3,12 @@
 Minilite64 is a 64-key hot-swap keyboard built around a Waveshare
 RP2040-Zero.  Its main PCB uses two copper layers; the Vial firmware exposes
 four dynamic keymap layers.  The main keyboard PCB and controller carrier are
-connected by a 20-position, 1.0 mm Type-A FFC.  The design has no per-key
-lighting.
+connected by a 21 mm-wide, 100 mm-long, 20-position 1.0 mm Type-A FFC.  The
+design has no per-key lighting.
+
+Assembly is main-board first and controller last.  Lock the main FFC end before
+fastening the main PCB, connect the carrier/cover outside the case, then guide
+the smooth rear service loop home and install the carrier-cover screws.
 
 ## Release contents
 
@@ -25,6 +29,10 @@ The main PCB front silkscreen also carries the complete corrected plate DXF at
 
 The checked-in UF2 was built with `arm-none-eabi-gcc 13.2.1`; its SHA-256 is
 recorded in `firmware/releases/SHA256SUMS.txt`.
+
+The current mechanical package is **prototype-only** until a real 100 mm FFC
+has been installed and repeatedly serviced in a printed case.  Automated solid
+checks cannot prove that a flexible cable will settle into the modeled scroll.
 
 ## Important fabrication note
 

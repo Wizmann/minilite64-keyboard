@@ -20,7 +20,7 @@
     },
     "case_full": {
       "valid": true,
-      "volume_mm3": 167720.405,
+      "volume_mm3": 167374.545,
       "bounds_mm": [
         306.799,
         106.299,
@@ -29,7 +29,7 @@
     },
     "case_a1_standing": {
       "valid": true,
-      "volume_mm3": 167720.405,
+      "volume_mm3": 167374.545,
       "bounds_mm": [
         234.223,
         234.223,
@@ -38,11 +38,11 @@
     },
     "service_cover": {
       "valid": true,
-      "volume_mm3": 5013.445,
+      "volume_mm3": 4983.889,
       "bounds_mm": [
         53.65,
         39.8,
-        8.0
+        7.7
       ]
     },
     "plate_spacer": {
@@ -90,18 +90,47 @@
     "foot_recess_depth_mm": 0.65,
     "foot_recess_minimum_floor_mm": 1.75,
     "plate_a1_joint_total_gap_mm": 0.4,
-    "ffc_minimum_bend_radius_mm": 6.0,
+    "ffc_minimum_bend_radius_mm": 3.0,
+    "ffc_installed_bend_radius_mm": 3.2,
+    "ffc_installed_maximum_bend_radius_mm": 4.0,
+    "ffc_service_scroll_turns": 2.5,
+    "ffc_flexible_body_nominal_thickness_mm": 0.15,
+    "ffc_flexible_body_maximum_thickness_mm": 0.2,
+    "ffc_scroll_radial_pitch_mm": 0.32,
+    "ffc_scroll_minimum_actual_layer_gap_mm": 0.12,
+    "ffc_width_mm": 21.0,
+    "ffc_length_mm": 100.0,
+    "ffc_type": "A / same-side",
+    "ffc_axial_twist": false,
+    "ffc_installed_centerline_length_mm": 91.514,
+    "ffc_installed_slack_mm": 8.486,
+    "ffc_theoretical_straight_line_cover_travel_mm": 81.625,
+    "ffc_verified_service_pose_travel_mm": 65.0,
+    "ffc_verified_service_pose_centerline_length_mm": 94.762,
+    "ffc_verified_service_pose_slack_mm": 5.238,
+    "ffc_verified_service_pose_minimum_radius_mm": 3.6,
+    "ffc_verified_service_pose_cubic_minimum_radius_mm": 4.82,
+    "ffc_both_ends_locked_cover_install_allowed": true,
+    "ffc_required_assembly_sequence": [
+      "lock main end before fastening main PCB",
+      "fasten main PCB and guide cable into rear service-loop pocket",
+      "lock carrier end with carrier and cover outside the case",
+      "guide service loop home, seat carrier cover, then install cover screws"
+    ],
+    "ffc_service_requires_main_pcb_release_first": false,
+    "ffc_rear_wall_skin_mm": 2.075,
+    "usb_to_ffc_pocket_web_mm": 1.25,
     "reserved_ffc_corridor_mm": [
-      132.6,
-      -0.2,
-      153.15,
-      35.5,
-      3.0,
-      19.1
+      131.625,
+      -3.319,
+      154.125,
+      31.0,
+      10.1,
+      18.739
     ],
     "main_component_to_mount_boss_intersection_mm3": 0.0,
     "main_component_to_controller_intersection_mm3": 0.0,
-    "main_component_to_controller_clearance_mm": 1.359,
+    "main_component_to_controller_clearance_mm": 1.259,
     "main_component_to_floor_clearance_mm": 6.178,
     "controller_to_case_intersection_mm3": 0.0,
     "controller_to_service_cover_intersection_mm3": 0.0,
@@ -111,6 +140,14 @@
     "stabilizer_to_spacer_intersection_mm3": 0.0,
     "ffc_corridor_to_case_intersection_mm3": 0.0,
     "ffc_corridor_to_mount_boss_intersection_mm3": 0.0,
+    "ffc_to_main_nonconnector_intersection_mm3": 0.0,
+    "ffc_to_controller_nonconnector_intersection_mm3": 0.0,
+    "ffc_to_main_pcb_intersection_mm3": 0.0,
+    "ffc_to_carrier_pcb_intersection_mm3": 0.0,
+    "service_pose_ffc_to_case_intersection_mm3": 0.0,
+    "service_pose_ffc_to_main_nonconnector_intersection_mm3": 0.0,
+    "service_pose_carrier_to_case_intersection_mm3": 0.0,
+    "service_pose_cover_to_case_intersection_mm3": 0.0,
     "minimum_keycap_to_inner_wall_xy_clearance_mm": 0.7,
     "wall_top_to_keycap_skirt_vertical_clearance_mm": 1.5,
     "controller_bay_inside_gh60_footprint": true,
@@ -165,6 +202,8 @@
         159.875,
         32.0
       ]
-    ]
+    ],
+    "release_status": "prototype-only until a real 100 mm FFC fit check passes",
+    "physical_ffc_fit_check_required": true
   }
 }

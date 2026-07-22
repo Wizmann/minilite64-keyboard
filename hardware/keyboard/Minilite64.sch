@@ -1807,7 +1807,7 @@ L Connector_Generic:Conn_01x20 J1
 U 1 1 a0e977ef
 P 14800 9300
 F 0 "J1" H 14980 9400 50  0000 C CNN
-F 1 "20P 1.0mm FFC" H 15050 9200 50  0000 C CNN
+F 1 "Type-A FFC / pins straight" H 15050 9200 50  0000 C CNN
 	1    14800 9300
 	1 0 0 -1
 $EndComp

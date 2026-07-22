@@ -17,7 +17,7 @@ requirements are:
 - No keyboard lighting.  The RP2040-Zero's onboard indicators are unaffected.
 - A two-copper-layer main PCB with a rectangular GH60-style envelope and no PCB tongue.
 - A separate Waveshare RP2040-Zero carrier.
-- A 20-position, 1.0 mm Type-A/same-side FFC, nominally 80 mm long.
+- A 21 mm-wide, 100 mm-long, 20-position 1.0 mm Type-A/same-side FFC.
 - Vial/VIA remapping, four dynamic layers, Bootmagic, and a firmware boot key.
 - A PC or FR4 plate, 1.5 mm thick, plus printable verification plates.
 - A Case.step-inspired wedge case, a bottom service cover, and a one-piece
@@ -32,13 +32,17 @@ two copper layers, 0.20 mm minimum routed track width, 0.20 mm minimum routed
 clearance, 0.30 mm vias, and a nominal 1.60 mm board thickness.
 
 The switch matrix has five rows and fourteen columns.  Diode direction is
-`COL2ROW`.  The FFC pinout is:
+`COL2ROW`.  Both bottom-contact ZIF mouths face the number-row/rear side.  The
+specified Type-A cable forms a smooth service scroll in the internal rear-wall pocket, so
+the conductors stay flat without axial twist.  Pin numbers connect straight
+through:
 
-| FFC pin | Net | RP2040-Zero pad |
-|---:|---|---|
-| 1 | GND | GND |
-| 2-6 | ROW0-ROW4 | GP29, GP28, GP27, GP26, GP15 |
-| 7-20 | COL0-COL13 | GP13 through GP0 in the order recorded in `manufacturing/FFC_pinout.csv` |
+| Main J1 | Carrier J1 | Net | RP2040-Zero pad |
+|---:|---:|---|---|
+| 1 | 1 | COL0 | GP13 |
+| 2-14 | 2-14 | COL1-COL13 | GP12 through GP0 |
+| 15-19 | 15-19 | ROW0-ROW4 | GP29, GP28, GP27, GP26, GP15 |
+| 20 | 20 | GND | GND |
 
 The final main board includes seven usable mounting locations:
 
@@ -148,7 +152,7 @@ high edge, and a 5 degree wedge.  It
 adds a 2.5 mm wall taper, an R2 upper edge, and a C1.2 lower edge break so the
 printed shell does not leave a sharp hand-contact edge.  The previous flat tray
 and its rear controller projection were removed.  The carrier was moved
-forward so the service cover, USB-C tunnel, and R6 FFC corridor all fit inside
+forward so the service cover, USB-C tunnel, and FFC C-bend pocket all fit inside
 the rectangular exterior.
 
 Four recessed adhesive-foot locations support the case near its corners.
@@ -164,7 +168,7 @@ The main PCB, plate, spacers, screw axes, and upper post sections share the
 | Item | Number-row/high datum | Spacebar/low datum |
 |---|---:|---:|
 | Case floor | 0-2.4 mm | 0-2.4 mm |
-| Carrier PCB | 8.0-9.6 mm | horizontal |
+| Carrier PCB | 7.7-9.3 mm | horizontal |
 | Main PCB bottom | 19.1 mm | 10.81 mm |
 | Plate bottom | 25.7 mm | 17.41 mm |
 | Case rim | 29.318 mm exterior | 20.0 mm exterior |
@@ -172,10 +176,28 @@ The main PCB, plate, spacers, screw axes, and upper post sections share the
 The height values at the PCB edges differ slightly from the case exterior-edge
 values because the PCB is inset from the front and rear walls.
 
-The 80 mm FFC must be stored as a broad S-shaped loop in the reserved center
-bay.  Keep every bend at or above R6, keep the cable inside the documented
-20.55 mm-wide corridor, and never crease it at either ZIF mouth.  Insert and
-lock the FFC before tightening the main PCB.
+The 100 mm Type-A FFC exits the main ZIF toward the rear wall, forms a loose
+2.5-turn service scroll in the internal pocket, and then runs forward above
+the carrier PCB.  The 22.5 mm-wide envelope gives the 21 mm cable 0.75 mm
+clearance per side.  The modeled neutral-axis radius grows from R3.2 to R4.0;
+there are no sharp accordion folds and no long-axis twist.  The pocket is
+internal, so the GH60 exterior remains unchanged.
+
+The 81.625 mm straight-line number in the generated review is only a theoretical
+upper bound and is not used as the release gate.  A separate service pose keeps
+the rear R3.6 hairpin inside the blind pocket, applies tangent exits at both
+ZIFs, and holds the connected carrier/cover 65 mm below its installed position.
+That constructed path is 94.762 mm long, retains 5.238 mm slack, has an overall
+minimum radius of R3.6 at the fixed rear hairpin and R4.82 on the cubic drop,
+and has zero modeled intersections.  This supports the
+required main-first assembly: connect and fasten the main PCB, connect the
+carrier outside the case, guide the scroll home, and install the cover screws.
+
+Specify an FFC flexible-body thickness of 0.20 mm or less; 0.30 mm is acceptable
+only at the reinforced contact ends.  The scroll radial pitch is 0.32 mm, which
+leaves at least 0.12 mm between 0.20 mm flexible layers.  The USB tunnel was
+lowered to leave a 1.25 mm printed web to the cable pocket, and rear-wall skin
+is 2.075 mm.  These are modeled values, not a substitute for a physical fit.
 
 The assembled-orientation case is 307 mm long, but the one-piece
 `Minilite64_case_A1_standing.stl` is stored front-wall-down and rotated 45
@@ -224,25 +246,33 @@ These checks are envelope checks, not a substitute for a physical prototype.
 Print the fit-check plate, install representative switches, sockets,
 stabilizers, screws, and an actual FFC, then print the case.
 
+The mechanical release remains **prototype-only** until a real 100 x 21 mm FFC
+is shown to settle into the service pocket without creasing or springing into
+the controller, and the controller-last operation is repeated several times.
+
 ## 7. Assembly order
 
 1. Inspect both PCBs under magnification and check for solder bridges.
 2. Solder the 64 diodes with the cathode stripe toward the row bus.
 3. Solder the 64 Kailh hot-swap sockets on the main PCB bottom.
-4. Solder both 20P ZIF connectors.  Confirm pin 1 before installing the FFC.
+4. Solder both 20P ZIF connectors.  Confirm that both mouths face the rear and
+   pin 1 is on the COL0 side before installing the FFC.
 5. Solder the RP2040-Zero castellations to the carrier with USB-C toward the
    rear opening.
-6. Mount the carrier to the service cover, module side toward the closed cover
-   surface; the modeled standoffs provide component clearance.
-7. Insert and lock the FFC at the carrier, route a broad R6-or-larger S loop,
-   and lock the main-board end.
-8. Heat-set the seven main M2 inserts with a temperature-controlled tip.  Keep
+6. Heat-set the seven main M2 inserts with a temperature-controlled tip.  Keep
    each insert square to the tilted boss and stop flush; do not force it deeper
    than the 3 mm insert length.
-9. Install seven 5 mm plate spacers, the main PCB, plate, plate stabilizers, and
-   switches.  Use the two new symmetric bottom-row supports, not the deleted
-   Menu-key screw location.
-10. Check the FFC through the open service bay, then install the cover.
+7. Mount the carrier to the service cover, module side toward the closed cover
+   surface; the modeled standoffs provide component clearance.
+8. Install the seven 5 mm plate spacers and prepare the main PCB/plate stack.
+   Use the two new symmetric bottom-row supports, not the deleted Menu-key
+   screw location, but do not install the main PCB screws yet.
+9. Insert and lock the Type-A FFC at main-board J1, guide the free end through
+   the rear service-loop pocket, then lower and screw down the main PCB.
+10. Hold the carrier/cover outside the bottom opening, insert and lock the free
+    FFC end at carrier J1, and inspect the latch.  Guide the cable into the
+    rounded service-scroll pocket without twisting it, seat the carrier cover,
+    then install the cover screws.
 11. Flash the UF2 and perform a full matrix test before fitting keycaps.
 
 For normal remapping, use Vial.  The physical BOOT/RESET buttons should rarely
@@ -307,7 +337,8 @@ python tools/validate_release.py
 - Verify the exact purchased ZIF footprint against the board before ordering a
   production batch; generic 20P 1.0 mm connectors are not mechanically
   interchangeable.
-- Buy a same-side/Type-A 20P 1.0 mm FFC and enforce R6 during installation.
+- Buy a 21 mm-wide, 100 mm Type-A/same-side 20P 1.0 mm FFC.  Keep the installed
+  service scroll at R3 or larger and never twist the cable around its long axis.
 - Confirm M2 heat-set inserts are 3.2 mm nominal OD and 3 mm long before
   heating them into the 2.8 mm case pilots; tune the pilot on a test coupon if
   the actual insert knurl differs.

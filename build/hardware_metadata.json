@@ -76,8 +76,15 @@
   "ffc": {
     "positions": 20,
     "pitch": 1.0,
-    "length": 80,
+    "width": 21.0,
+    "length": 100,
     "type": "A / same-side",
-    "minimum_bend_radius": 6.0
+    "minimum_bend_radius": 3.0,
+    "target_bend_radius": 4.0,
+    "maximum_flexible_body_thickness": 0.2,
+    "assembly_strategy": "main-first / carrier-last",
+    "both_ends_locked_cover_install_allowed": true,
+    "release_status": "prototype-only until real FFC fit check",
+    "axial_twist": false
   }
 }

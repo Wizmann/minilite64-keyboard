@@ -2,7 +2,7 @@
 SW1-SW64,64,Kailh MX hot-swap socket CPG151101S11,Kailh hotswap SMD,Hand solder,Socket on PCB bottom
 D1-D64,64,1N4148W,SOD-123,Hand solder,Large hand-solder pads; cathode stripe to ROW
 "J1 (main), J1 (carrier)",2,20P 1.0mm bottom-contact flip-lock FFC/FPC connector,20P 1.0mm SMT,Hand solder,Generic or equivalent; verify same footprint
-FFC1,1,"20P 1.0mm Type-A FFC, 80mm",Same-side contacts,Purchased cable,Minimum installed bend radius 6mm
+FFC1,1,"20P 1.0mm Type-A FFC, 100mm x 21mm",Same-side contacts,Purchased cable,No axial twist; flexible body <=0.20mm; prototype-fit the smooth service scroll
 U1,1,Waveshare RP2040-Zero 23.5x18mm USB-C,Castellated module,Hand solder,Mount component-side up; USB toward rear
 H1-H5 main,5,M2 screw + 3.2x3mm heat-set insert,Mechanical,Assembly,Three original mounts plus two balanced bottom-row supports
 S1-S2 main sides,2,M2 screw + 3.2x3mm heat-set insert,Mechanical,Assembly,Left/right DXF edge slots; screw heads retain PCB and plate

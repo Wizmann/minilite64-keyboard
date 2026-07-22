@@ -1,6 +1,6 @@
 PCB statistics report
 =====================
-- Date: 2026/7/22 15:14:52
+- Date: 2026/7/22 23:15:22
 - Project: RP2040_Zero_Carrier
 - Board name: RP2040_Zero_Carrier
 
@@ -9,8 +9,8 @@ Board
 - Width: 40.0000 mm
 - Height: 36.0000 mm
 - Area: 1440.00 mm²
-- Front copper area: 158.152 mm²
-- Back copper area: 126.811 mm²
+- Front copper area: 158.459 mm²
+- Back copper area: 116.371 mm²
 - Min track clearance: 0.2017 mm
 - Min track width: 0.2000 mm
 - Min drill diameter: 0.3000 mm

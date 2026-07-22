@@ -68,7 +68,7 @@ PLATE_Z = MAIN_PCB_Z + PCB_T + PLATE_GAP
 # selected 307 x 106.5 mm GH60-style footprint.  Its USB-C receptacle faces the rear
 # wall and the FFC exits toward the main PCB without a tight fold.
 CARRIER_ORIGIN = (122.875, -1.00)
-CARRIER_Z = 8.0
+CARRIER_Z = 7.7
 CARRIER_T = 1.6
 CARRIER_HOLES_LOCAL = [(3, 3), (37, 3), (3, 33), (37, 33)]
 CARRIER_HOLES = [
@@ -79,6 +79,33 @@ CARRIER_HOLES = [
 SERVICE_OUTER = (115.90, -2.70, 54.05, 40.20)
 SERVICE_OPEN = (117.45, -1.60, 50.95, 37.95)
 SERVICE_SCREWS = [(118.9, 0.1), (166.9, 0.1), (118.9, 34.9), (166.9, 34.9)]
+
+# The 100 mm Type-A cable leaves the main ZIF through an internal rear-wall
+# service-loop pocket, then runs flat above the carrier PCB.  The extra length
+# lets the already-connected carrier/cover be held well outside the case for
+# latch access before it is returned and screwed down.  The envelope includes
+# print/placement clearance around the nominal 21 mm cable.
+FFC_W = 21.0
+FFC_ENVELOPE_W = 22.5
+FFC_ENVELOPE_X = PCB_CX - FFC_ENVELOPE_W / 2
+# Typical flexible body thickness is about 0.12-0.15 mm; 0.30 mm applies to
+# the reinforced contact ends.  The BOM caps the flexible body at 0.20 mm.
+FFC_T = 0.15
+FFC_MAX_BODY_T = 0.20
+FFC_ENVELOPE_T = 0.80
+FFC_LENGTH = 100.0
+FFC_MAIN_MOUTH_Y = 0.0
+FFC_MAIN_SLOT_Z = 17.70
+FFC_CARRIER_MOUTH_Y = CARRIER_ORIGIN[1] + 26.8
+FFC_CARRIER_SLOT_Z = CARRIER_Z + CARRIER_T + 1.20
+FFC_SCROLL_TURNS = 2.5
+FFC_SCROLL_CY = 1.00
+FFC_SCROLL_CZ = 14.50
+FFC_SCROLL_R0 = 3.20
+FFC_SCROLL_R1 = 4.00
+FFC_POCKET_Y0 = -3.55
+FFC_POCKET_Z0 = 9.95
+FFC_POCKET_Z1 = 18.95
 
 # Four pads define a stable support plane and tolerate print warp better than
 # six hard points.  These pockets target common Ø10 x 1.5-2.0 mm self-adhesive
@@ -509,13 +536,24 @@ def case_shape():
                                 FLOOR_T, CASE_REAR_H - FLOOR_T + 0.7)
     case = outer.cut(cavity.fuse(rear_cavity))
 
+    # Internal-only FFC return pocket.  It preserves the GH60 outside plan,
+    # leaves over four 0.4 mm extrusion lines at the rear skin, and keeps the
+    # bend above the USB-C tunnel with a printable web between the openings.
+    ffc_pocket = Part.makeBox(
+        FFC_ENVELOPE_W + 1.0,
+        -0.25 - FFC_POCKET_Y0,
+        FFC_POCKET_Z1 - FFC_POCKET_Z0,
+        App.Vector(FFC_ENVELOPE_X - 0.5, FFC_POCKET_Y0, FFC_POCKET_Z0),
+    )
+    case = case.cut(ffc_pocket)
+
     # Recess adhesive feet into the outside bottom without breaking through
     # the 2.4 mm floor or touching the internal ribs.
     case = case.cut(foot_recess_cutters())
 
     # Rear USB-C tunnel.  The module receptacle face is about 4 mm inboard and
     # no external controller tongue or case projection is required.
-    usb = Part.makeBox(15.5, 5.5, 6.6, App.Vector(136.8, CASE_Y - 0.2, 3.2))
+    usb = Part.makeBox(15.5, 5.5, 6.0, App.Vector(136.8, CASE_Y - 0.2, 2.7))
     case = case.cut(usb)
 
     # Bottom service-cover opening plus a shallow flush flange recess.
@@ -564,20 +602,28 @@ def carrier_shape():
                         App.Vector(CARRIER_ORIGIN[0], CARRIER_ORIGIN[1], CARRIER_Z))
 
 
-def component_envelopes(keys):
+def component_envelopes(keys, include_ffc=True):
     sockets = []
     diodes = []
     for key in keys:
         x, y, row = key[0], key[1], key[2]
         if row == 0:
-            sockets.append(Part.makeBox(7.0, 16.0, 2.8, App.Vector(x - 3.5, y - 8.0, MAIN_PCB_Z - 2.8)))
-            dx, dy = x + 2.0, y - 7.6
+            # The electrical footprint is rotated 180 degrees, which does not
+            # rotate the Kailh socket body by 90 degrees.  Its plastic remains
+            # a 14 x 6 mm horizontal envelope.
+            sockets.append(Part.makeBox(14.0, 6.0, 2.8, App.Vector(x - 7.0, y - 3.0, MAIN_PCB_Z - 2.8)))
+            dx, dy = x + 7.742, y + 8.0
         else:
             sockets.append(Part.makeBox(14.0, 6.0, 2.8, App.Vector(x - 7.0, y - 3.0, MAIN_PCB_Z - 2.8)))
             dx, dy = x - 7.65, y + 4.6
         diodes.append(Part.makeBox(4.2, 2.4, 2.0, App.Vector(dx - 2.1, dy - 1.2, MAIN_PCB_Z - 2.0)))
-    main_ffc = Part.makeBox(23.2, 7.0, 2.6, App.Vector(131.275, 0.20, MAIN_PCB_Z - 2.6))
-    return tilted(Part.makeCompound(sockets + diodes + [main_ffc]))
+    solids = sockets + diodes
+    if include_ffc:
+        solids.append(Part.makeBox(
+            23.2, 7.0, 3.0,
+            App.Vector(131.275, -0.80, MAIN_PCB_Z - 3.0),
+        ))
+    return tilted(Part.makeCompound(solids))
 
 
 def stabilizer_envelopes(keys):
@@ -603,7 +649,7 @@ def assembled_spacers():
     return tilted(Part.makeCompound(solids))
 
 
-def controller_envelopes():
+def controller_envelopes(include_ffc=True):
     # RP2040-Zero and USB-C are on F.Cu (down); the FFC is on B.Cu (up).
     rp = Part.makeBox(18.0, 23.5, 4.0,
                       App.Vector(CARRIER_ORIGIN[0] + 11.0,
@@ -613,11 +659,142 @@ def controller_envelopes():
                        App.Vector(CARRIER_ORIGIN[0] + 15.67,
                                   CARRIER_ORIGIN[1] + 0.30,
                                   CARRIER_Z - 4.2))
-    ffc = Part.makeBox(23.2, 7.0, 2.6,
-                       App.Vector(CARRIER_ORIGIN[0] + 8.4,
-                                  CARRIER_ORIGIN[1] + 28.8,
-                                  CARRIER_Z + CARRIER_T))
-    return Part.makeCompound([rp, usb, ffc])
+    solids = [rp, usb]
+    if include_ffc:
+        solids.append(Part.makeBox(
+            23.2, 7.0, 3.0,
+            App.Vector(CARRIER_ORIGIN[0] + 8.4,
+                       CARRIER_ORIGIN[1] + 26.0,
+                       CARRIER_Z + CARRIER_T),
+        ))
+    return Part.makeCompound(solids)
+
+
+def ribbon_segment(start, end):
+    """Conservative rectangular ribbon envelope between two Y-Z points."""
+    y0, z0 = start
+    y1, z1 = end
+    dy, dz = y1 - y0, z1 - z0
+    length = math.hypot(dy, dz)
+    ny = -dz / length * FFC_ENVELOPE_T / 2
+    nz = dy / length * FFC_ENVELOPE_T / 2
+    points = [
+        App.Vector(FFC_ENVELOPE_X, y0 + ny, z0 + nz),
+        App.Vector(FFC_ENVELOPE_X, y1 + ny, z1 + nz),
+        App.Vector(FFC_ENVELOPE_X, y1 - ny, z1 - nz),
+        App.Vector(FFC_ENVELOPE_X, y0 - ny, z0 - nz),
+        App.Vector(FFC_ENVELOPE_X, y0 + ny, z0 + nz),
+    ]
+    return Part.Face(Part.makePolygon(points)).extrude(
+        App.Vector(FFC_ENVELOPE_W, 0, 0)
+    )
+
+
+def ffc_service_scroll():
+    """Installed 100 mm Type-A service loop with no long-axis twist.
+
+    The scroll is a loose 2.5-turn path rather than a stack of sharp folds.
+    Its neutral radius grows from R3.2 to R4.0 so adjacent cable layers do not
+    occupy the same plane.  A conservative 0.8 mm-thick collision envelope is
+    used around the nominal 0.15 mm flexible cable body.
+    """
+    sample_count = 121
+    points = []
+    for index in range(sample_count):
+        fraction = index / (sample_count - 1)
+        angle = math.radians(90.0 + 360.0 * FFC_SCROLL_TURNS * fraction)
+        radius = FFC_SCROLL_R0 + (FFC_SCROLL_R1 - FFC_SCROLL_R0) * fraction
+        points.append((
+            FFC_SCROLL_CY + radius * math.cos(angle),
+            FFC_SCROLL_CZ + radius * math.sin(angle),
+        ))
+    segments = [
+        ribbon_segment((6.0, FFC_MAIN_SLOT_Z), points[0]),
+        *(ribbon_segment(a, b) for a, b in zip(points, points[1:])),
+        ribbon_segment(points[-1], (FFC_CARRIER_MOUTH_Y, FFC_CARRIER_SLOT_Z)),
+    ]
+    carrier_insert = ribbon_segment(
+        (FFC_CARRIER_MOUTH_Y, FFC_CARRIER_SLOT_Z),
+        (CARRIER_ORIGIN[1] + 32.0, FFC_CARRIER_SLOT_Z),
+    )
+    segments.append(carrier_insert)
+    return Part.makeCompound(segments), points
+
+
+def cubic_bezier(points, sample_count=81):
+    """Sample a cubic Bezier in the Y-Z plane."""
+    p0, p1, p2, p3 = points
+    result = []
+    for index in range(sample_count):
+        t = index / (sample_count - 1)
+        u = 1.0 - t
+        result.append((
+            u ** 3 * p0[0] + 3 * u * u * t * p1[0]
+            + 3 * u * t * t * p2[0] + t ** 3 * p3[0],
+            u ** 3 * p0[1] + 3 * u * u * t * p1[1]
+            + 3 * u * t * t * p2[1] + t ** 3 * p3[1],
+        ))
+    return result
+
+
+def polyline_length(points):
+    return sum(math.hypot(b[0] - a[0], b[1] - a[1])
+               for a, b in zip(points, points[1:]))
+
+
+def minimum_polyline_radius(points):
+    """Conservative circumcircle radius across sampled triples."""
+    radii = []
+    for a, b, c in zip(points, points[1:], points[2:]):
+        ab = math.hypot(b[0] - a[0], b[1] - a[1])
+        bc = math.hypot(c[0] - b[0], c[1] - b[1])
+        ca = math.hypot(a[0] - c[0], a[1] - c[1])
+        twice_area = abs((b[0] - a[0]) * (c[1] - a[1])
+                         - (b[1] - a[1]) * (c[0] - a[0]))
+        if twice_area > 1e-9:
+            radii.append(ab * bc * ca / (2.0 * twice_area))
+    return min(radii)
+
+
+def ffc_service_pose(travel=65.0):
+    """A constructible carrier-last pose with tangent exits at both ZIFs.
+
+    The fixed rear R3.6 hairpin stays in the blind case pocket.  A cubic curve
+    then drops through the bottom service opening; its 15 mm tangent controls
+    keep the minimum sampled radius above R4 while the carrier/cover is held
+    65 mm below its installed position.
+    """
+    r = (FFC_MAIN_SLOT_Z - FFC_CARRIER_SLOT_Z) / 2.0
+    cz = (FFC_MAIN_SLOT_Z + FFC_CARRIER_SLOT_Z) / 2.0
+    hairpin = []
+    for index in range(41):
+        angle = math.radians(90.0 + 180.0 * index / 40.0)
+        hairpin.append((
+            FFC_SCROLL_CY + r * math.cos(angle),
+            cz + r * math.sin(angle),
+        ))
+    start = hairpin[-1]
+    end = (FFC_CARRIER_MOUTH_Y, FFC_CARRIER_SLOT_Z - travel)
+    control = 15.0
+    drop = cubic_bezier([
+        start,
+        (start[0] + control, start[1]),
+        (end[0] - control, end[1]),
+        end,
+    ])
+    centreline = [*hairpin, *drop[1:]]
+    shapes = [
+        ribbon_segment((6.0, FFC_MAIN_SLOT_Z), hairpin[0]),
+        *(ribbon_segment(a, b) for a, b in zip(centreline, centreline[1:])),
+        ribbon_segment(end, (CARRIER_ORIGIN[1] + 32.0,
+                             FFC_CARRIER_SLOT_Z - travel)),
+    ]
+    length = (math.hypot(6.0 - hairpin[0][0],
+                         FFC_MAIN_SLOT_Z - hairpin[0][1])
+              + polyline_length(centreline)
+              + CARRIER_ORIGIN[1] + 32.0 - FFC_CARRIER_MOUTH_Y)
+    cubic_min_radius = minimum_polyline_radius(drop)
+    return Part.makeCompound(shapes), length, min(r, cubic_min_radius), cubic_min_radius
 
 
 def parse_keys():
@@ -735,15 +912,15 @@ def main():
     carrier = carrier_shape()
     keys = parse_keys()
     main_components = component_envelopes(keys)
+    main_nonffc = component_envelopes(keys, include_ffc=False)
     stabilizers = stabilizer_envelopes(keys)
     spacers = assembled_spacers()
     ctrl_components = controller_envelopes()
-    # 20 mm cable plus 0.275 mm side clearance.  Connector hold-down tabs sit
-    # outside this flexible-cable envelope and do not travel through the bay.
-    ffc_corridor = Part.makeBox(
-        20.55, 35.7, MAIN_PCB_Z - 3.0,
-        App.Vector(132.60, -0.2, 3.0),
-    )
+    ctrl_nonffc = controller_envelopes(include_ffc=False)
+    ffc_corridor, ffc_scroll_points = ffc_service_scroll()
+    service_travel = 65.0
+    (ffc_service, service_centreline_length, service_min_radius,
+     service_cubic_min_radius) = ffc_service_pose(service_travel)
 
     report = {"artifacts": {}}
     artifacts = report["artifacts"]
@@ -764,6 +941,11 @@ def main():
         ("MainComponents", main_components), ("Stabilizers", stabilizers),
         ("PlateSpacers", spacers), ("CarrierPCB", carrier),
         ("ControllerComponents", ctrl_components),
+        ("FFCNoTwistEnvelope", ffc_corridor),
+        ("FFCServicePose65mm", ffc_service),
+        ("CarrierPCBServicePose", moved(carrier, App.Vector(0, 0, -service_travel))),
+        ("ControllerServicePose", moved(ctrl_components, App.Vector(0, 0, -service_travel))),
+        ("ServiceCoverPose", moved(cover, App.Vector(0, 0, -service_travel))),
     ])
     write_corrected_dxf(OUT / "Minilite64_plate_fixed.dxf", corrected_dxf_contours)
 
@@ -782,6 +964,34 @@ def main():
     stabilizer_to_spacer = stabilizers.common(spacers).Volume
     ffc_corridor_to_case = ffc_corridor.common(case).Volume
     ffc_corridor_to_boss = ffc_corridor.common(main_bosses()).Volume
+    ffc_to_main_nonconnector = ffc_corridor.common(main_nonffc).Volume
+    ffc_to_controller_nonconnector = ffc_corridor.common(ctrl_nonffc).Volume
+    ffc_to_main_pcb = ffc_corridor.common(pcb).Volume
+    ffc_to_carrier_pcb = ffc_corridor.common(carrier).Volume
+    service_ffc_to_case = ffc_service.common(case).Volume
+    service_ffc_to_main_nonconnector = ffc_service.common(main_nonffc).Volume
+    service_carrier_to_case = moved(
+        carrier.fuse(ctrl_components), App.Vector(0, 0, -service_travel)
+    ).common(case).Volume
+    service_cover_pose_to_case = moved(
+        cover, App.Vector(0, 0, -service_travel)
+    ).common(case).Volume
+    scroll_length = sum(
+        math.hypot(b[0] - a[0], b[1] - a[1])
+        for a, b in zip(ffc_scroll_points, ffc_scroll_points[1:])
+    )
+    installed_centreline_length = (
+        math.hypot(6.0 - ffc_scroll_points[0][0],
+                   FFC_MAIN_SLOT_Z - ffc_scroll_points[0][1])
+        + scroll_length
+        + math.hypot(FFC_CARRIER_MOUTH_Y - ffc_scroll_points[-1][0],
+                     FFC_CARRIER_SLOT_Z - ffc_scroll_points[-1][1])
+        + (CARRIER_ORIGIN[1] + 32.0 - FFC_CARRIER_MOUTH_Y)
+    )
+    endpoint_y_span = CARRIER_ORIGIN[1] + 32.0 - 6.0
+    installed_z_span = FFC_MAIN_SLOT_Z - FFC_CARRIER_SLOT_Z
+    theoretical_open_z_span = math.sqrt(FFC_LENGTH ** 2 - endpoint_y_span ** 2)
+    theoretical_cover_travel = theoretical_open_z_span - installed_z_span - 8.0
     inner_x0, inner_x1 = -0.30, 286.05
     inner_y0, inner_y1 = -0.30, 95.55
     keycap_clearances = []
@@ -807,8 +1017,51 @@ def main():
         "foot_recess_depth_mm": FOOT_RECESS_DEPTH,
         "foot_recess_minimum_floor_mm": FLOOR_T - FOOT_RECESS_DEPTH,
         "plate_a1_joint_total_gap_mm": PLATE_JOINT_GAP,
-        "ffc_minimum_bend_radius_mm": 6.0,
-        "reserved_ffc_corridor_mm": [132.60, -0.2, 153.15, 35.5, 3.0, MAIN_PCB_Z],
+        "ffc_minimum_bend_radius_mm": 3.0,
+        "ffc_installed_bend_radius_mm": FFC_SCROLL_R0,
+        "ffc_installed_maximum_bend_radius_mm": FFC_SCROLL_R1,
+        "ffc_service_scroll_turns": FFC_SCROLL_TURNS,
+        "ffc_flexible_body_nominal_thickness_mm": FFC_T,
+        "ffc_flexible_body_maximum_thickness_mm": FFC_MAX_BODY_T,
+        "ffc_scroll_radial_pitch_mm": round(
+            (FFC_SCROLL_R1 - FFC_SCROLL_R0) / FFC_SCROLL_TURNS, 3
+        ),
+        "ffc_scroll_minimum_actual_layer_gap_mm": round(
+            (FFC_SCROLL_R1 - FFC_SCROLL_R0) / FFC_SCROLL_TURNS
+            - FFC_MAX_BODY_T, 3
+        ),
+        "ffc_width_mm": FFC_W,
+        "ffc_length_mm": FFC_LENGTH,
+        "ffc_type": "A / same-side",
+        "ffc_axial_twist": False,
+        "ffc_installed_centerline_length_mm": round(installed_centreline_length, 3),
+        "ffc_installed_slack_mm": round(FFC_LENGTH - installed_centreline_length, 3),
+        "ffc_theoretical_straight_line_cover_travel_mm": round(theoretical_cover_travel, 3),
+        "ffc_verified_service_pose_travel_mm": service_travel,
+        "ffc_verified_service_pose_centerline_length_mm": round(service_centreline_length, 3),
+        "ffc_verified_service_pose_slack_mm": round(FFC_LENGTH - service_centreline_length, 3),
+        "ffc_verified_service_pose_minimum_radius_mm": round(service_min_radius, 3),
+        "ffc_verified_service_pose_cubic_minimum_radius_mm": round(
+            service_cubic_min_radius, 3
+        ),
+        "ffc_both_ends_locked_cover_install_allowed": True,
+        "ffc_required_assembly_sequence": [
+            "lock main end before fastening main PCB",
+            "fasten main PCB and guide cable into rear service-loop pocket",
+            "lock carrier end with carrier and cover outside the case",
+            "guide service loop home, seat carrier cover, then install cover screws",
+        ],
+        "ffc_service_requires_main_pcb_release_first": False,
+        "ffc_rear_wall_skin_mm": round(FFC_POCKET_Y0 - CASE_Y, 3),
+        "usb_to_ffc_pocket_web_mm": round(FFC_POCKET_Z0 - (2.7 + 6.0), 3),
+        "reserved_ffc_corridor_mm": [
+            round(ffc_corridor.BoundBox.XMin, 3),
+            round(ffc_corridor.BoundBox.YMin, 3),
+            round(ffc_corridor.BoundBox.XMax, 3),
+            round(ffc_corridor.BoundBox.YMax, 3),
+            round(ffc_corridor.BoundBox.ZMin, 3),
+            round(ffc_corridor.BoundBox.ZMax, 3),
+        ],
         "main_component_to_mount_boss_intersection_mm3": round(boss_collision, 6),
         "main_component_to_controller_intersection_mm3": round(main_to_controller, 6),
         "main_component_to_controller_clearance_mm": round(main_to_controller_clearance, 3),
@@ -821,6 +1074,14 @@ def main():
         "stabilizer_to_spacer_intersection_mm3": round(stabilizer_to_spacer, 6),
         "ffc_corridor_to_case_intersection_mm3": round(ffc_corridor_to_case, 6),
         "ffc_corridor_to_mount_boss_intersection_mm3": round(ffc_corridor_to_boss, 6),
+        "ffc_to_main_nonconnector_intersection_mm3": round(ffc_to_main_nonconnector, 6),
+        "ffc_to_controller_nonconnector_intersection_mm3": round(ffc_to_controller_nonconnector, 6),
+        "ffc_to_main_pcb_intersection_mm3": round(ffc_to_main_pcb, 6),
+        "ffc_to_carrier_pcb_intersection_mm3": round(ffc_to_carrier_pcb, 6),
+        "service_pose_ffc_to_case_intersection_mm3": round(service_ffc_to_case, 6),
+        "service_pose_ffc_to_main_nonconnector_intersection_mm3": round(service_ffc_to_main_nonconnector, 6),
+        "service_pose_carrier_to_case_intersection_mm3": round(service_carrier_to_case, 6),
+        "service_pose_cover_to_case_intersection_mm3": round(service_cover_pose_to_case, 6),
         "minimum_keycap_to_inner_wall_xy_clearance_mm": round(min(keycap_clearances), 3),
         "wall_top_to_keycap_skirt_vertical_clearance_mm": 1.5,
         "controller_bay_inside_gh60_footprint": True,
@@ -829,6 +1090,8 @@ def main():
         "round_main_mounts": MAIN_ROUND_HOLES,
         "side_main_mounts": MAIN_EDGE_SLOTS,
         "carrier_mounts": CARRIER_HOLES,
+        "release_status": "prototype-only until a real 100 mm FFC fit check passes",
+        "physical_ffc_fit_check_required": True,
     }
     (BUILD / "mechanical_review.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))

@@ -626,7 +626,7 @@ def main_board_v2(keys: list[Key], out: Path):
     ]
     for a, b in zip(outline, outline[1:]):
         board.edge(a, b)
-    back_ffc_footprint(board, "J1", FFC_X0, 4.2, FFC_NETS, "main-revb-ffc")
+    back_ffc_footprint(board, "J1", FFC_X0, 3.2, FFC_NETS, "main-revb-ffc")
 
     by_row: dict[int, list[Key]] = {row: [] for row in range(5)}
     for key in keys:
@@ -859,9 +859,9 @@ def controller_board_v2(out: Path):
     # rear edge; the onboard BOOT/RESET buttons remain directly accessible.
     rp2040_footprint(board, (11.0, 1.5))
 
-    # Same net/pin order as the keyboard PCB.  The ZIF lock and cable mouth
-    # face the service-cover side with more than 8 mm finger/tool access.
-    back_ffc_footprint(board, "J1", 10.5, 32.8, FFC_NETS, "ctrl-revb-ffc")
+    # Both mouths face rear.  The carrier connector is pulled toward the main
+    # board so the installed Type-A C-loop can unfold for bottom-cover service.
+    back_ffc_footprint(board, "J1", 10.5, 30.0, FFC_NETS, "ctrl-revb-ffc")
 
     holes = [(3.0, 3.0), (37.0, 3.0), (3.0, 33.0), (37.0, 33.0)]
     for index, point in enumerate(holes, 1):
@@ -902,7 +902,7 @@ def write_keyboard_legacy_schematic(keys: list[Key], path: Path):
         parts.append(f"Wire Wire Line\n\t{x+100} {y} {x+320} {y}\n")
         parts.append(f"Wire Wire Line\n\t{x+520} {y} {x+700} {y}\n")
         parts.append(f"Text Label {x+700} {y} 0    40   ~ 0\nROW{key.row}\n")
-    parts.append(legacy_component("Connector_Generic:Conn_01x20", "J1", "20P 1.0mm FFC", 14800, 9300, orientation="1 0 0 -1"))
+    parts.append(legacy_component("Connector_Generic:Conn_01x20", "J1", "Type-A FFC / pins straight", 14800, 9300, orientation="1 0 0 -1"))
     for index, name in enumerate(FFC_NETS):
         y = 8350 + index * 100
         parts.append(f"Wire Wire Line\n\t14550 {y} 14350 {y}\nText Label 14350 {y} 2    40   ~ 0\n{name}\n")
@@ -918,7 +918,7 @@ def write_controller_legacy_schematic(path: Path):
         "LIBS:power\nLIBS:device\nLIBS:Connector_Generic\n",
         "EELAYER 29 0\nEELAYER END\n",
         "$Descr A4 11693 8268\nSheet 1 1\nTitle \"Minilite64 RP2040-Zero carrier\"\nComment1 \"Castellated module carrier and 20P FFC\"\n$EndDescr\n",
-        legacy_component("Connector_Generic:Conn_01x20", "J1", "20P 1.0mm FFC", 2900, 3700),
+        legacy_component("Connector_Generic:Conn_01x20", "J1", "Type-A FFC / pins straight", 2900, 3700),
         legacy_component("Connector_Generic:Conn_01x23", "U1", "Waveshare RP2040-Zero castellated", 7200, 3700),
     ]
     ffc_nets = FFC_NETS
@@ -954,7 +954,7 @@ def write_bom(keys: list[Key], root: Path):
         ["SW1-SW64", 64, "Kailh MX hot-swap socket CPG151101S11", "Kailh hotswap SMD", "Hand solder", "Socket on PCB bottom"],
         ["D1-D64", 64, "1N4148W", "SOD-123", "Hand solder", "Large hand-solder pads; cathode stripe to ROW"],
         ["J1 (main), J1 (carrier)", 2, "20P 1.0mm bottom-contact flip-lock FFC/FPC connector", "20P 1.0mm SMT", "Hand solder", "Generic or equivalent; verify same footprint"],
-        ["FFC1", 1, "20P 1.0mm Type-A FFC, 80mm", "Same-side contacts", "Purchased cable", "Minimum installed bend radius 6mm"],
+        ["FFC1", 1, "20P 1.0mm Type-A FFC, 100mm x 21mm", "Same-side contacts", "Purchased cable", "No axial twist; flexible body <=0.20mm; prototype-fit the smooth service scroll"],
         ["U1", 1, "Waveshare RP2040-Zero 23.5x18mm USB-C", "Castellated module", "Hand solder", "Mount component-side up; USB toward rear"],
         ["H1-H5 main", 5, "M2 screw + 3.2x3mm heat-set insert", "Mechanical", "Assembly", "Three original mounts plus two balanced bottom-row supports"],
         ["S1-S2 main sides", 2, "M2 screw + 3.2x3mm heat-set insert", "Mechanical", "Assembly", "Left/right DXF edge slots; screw heads retain PCB and plate"],
@@ -963,14 +963,16 @@ def write_bom(keys: list[Key], root: Path):
     with (root / "BOM.csv").open("w", newline="", encoding="utf-8-sig") as f:
         csv.writer(f).writerows(rows)
 
-    pin_rows = [["FFC pin", "Net", "RP2040-Zero pad"]]
-    pin_rows.append([1, "GND", "GND"])
+    pin_rows = [["Main J1 pin", "Carrier J1 pin", "Net", "RP2040-Zero pad"]]
+    rp_pad = {"GND": "GND"}
     row_gpio = [29, 28, 27, 26, 15]
     for row, gpio in enumerate(row_gpio):
-        pin_rows.append([2 + row, f"ROW{row}", f"GP{gpio}"])
+        rp_pad[f"ROW{row}"] = f"GP{gpio}"
     col_gpio = [13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
     for col, gpio in enumerate(col_gpio):
-        pin_rows.append([7 + col, f"COL{col}", f"GP{gpio}"])
+        rp_pad[f"COL{col}"] = f"GP{gpio}"
+    for carrier_pin, net in enumerate(FFC_NETS, 1):
+        pin_rows.append([carrier_pin, carrier_pin, net, rp_pad[net]])
     with (root / "FFC_pinout.csv").open("w", newline="", encoding="utf-8-sig") as f:
         csv.writer(f).writerows(pin_rows)
 
@@ -1012,7 +1014,14 @@ def main(write_carrier_seed: bool = False):
             "bottom_row_conflicting_mount_removed": True,
         },
         "controller_board": {"width": 40.0, "height": 36.0, "mount_holes": controller_holes},
-        "ffc": {"positions": 20, "pitch": 1.0, "length": 80, "type": "A / same-side", "minimum_bend_radius": 6.0},
+        "ffc": {"positions": 20, "pitch": 1.0, "width": 21.0, "length": 100,
+                "type": "A / same-side", "minimum_bend_radius": 3.0,
+                "target_bend_radius": 4.0,
+                "maximum_flexible_body_thickness": 0.20,
+                "assembly_strategy": "main-first / carrier-last",
+                "both_ends_locked_cover_install_allowed": True,
+                "release_status": "prototype-only until real FFC fit check",
+                "axial_twist": False},
     }
     build = ROOT / "build"
     build.mkdir(exist_ok=True)

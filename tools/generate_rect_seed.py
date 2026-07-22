@@ -114,9 +114,12 @@ def build(keys: list[Key], out):
     for a, b in zip(outline, outline[1:]):
         board.edge(a, b)
 
-    # Bottom-side ZIF mouth faces the rear edge.  Rotating only the top-row
-    # hot-swap sockets opens the shallow rear component corridor it needs.
-    back_ffc_footprint(board, "J1", FFC_X0, 4.2, FFC_NETS, "rect-seed-ffc")
+    # The bottom-side ZIF overhangs the PCB rear edge by 0.8 mm and opens into
+    # a matching internal case-wall cable pocket.  Both ZIF mouths face rear;
+    # a Type-A cable forms an untwisted service scroll between their parallel slots.
+    back_ffc_footprint(
+        board, "J1", FFC_X0, 3.2, FFC_NETS, "rect-seed-ffc",
+    )
 
     by_row = {row: [] for row in range(5)}
     diode_x_by_key = {}
@@ -209,7 +212,7 @@ def build(keys: list[Key], out):
     launch_y = 6.6
 
     for col in range(14):
-        pad_point = (FFC_X0 + col, 4.2)
+        pad_point = (FFC_X0 + col, 3.2)
         launch = (pad_point[0], launch_y)
         if col < 7:
             lane_y = 5.75 - col * 0.8
@@ -251,7 +254,7 @@ def build(keys: list[Key], out):
         ("B.Cu", 6.8), ("F.Cu", 6.8),
     ]
     for row, (layer, lane_y) in enumerate(row_lanes if ROUTE_FFC else []):
-        pad_point = (FFC_X0 + 14 + row, 4.2)
+        pad_point = (FFC_X0 + 14 + row, 3.2)
         bus_y = by_row[row][0].y + (9.5 if row == 0 else 8.0)
         target = (row_ends[row], bus_y)
         lane_target = (target[0], lane_y)
@@ -271,7 +274,7 @@ def build(keys: list[Key], out):
             board.segment(f"ROW{row}", lane_target, target, "B.Cu", fan_width)
 
     # ROW0 uses the clear corridor between the two centre top-row switches.
-    row0_pad = (FFC_X0 + 14, 4.2)
+    row0_pad = (FFC_X0 + 14, 3.2)
     row0_launch = (row0_pad[0], 7.4)
     row0_target = (154.5, 18.0)
     row0_bus = (154.5, by_row[0][0].y + 9.5)
@@ -285,7 +288,7 @@ def build(keys: list[Key], out):
     board.segment("ROW0", row0_target, row0_bus, "B.Cu", fan_width)
 
     # ROW1 steps through successive switch gaps as the rows stagger.
-    row1_pad = (FFC_X0 + 15, 4.2)
+    row1_pad = (FFC_X0 + 15, 3.2)
     row1_launch = (row1_pad[0], 6.8)
     row1_approach = (190.5, 19.0)
     row1_drop = (191.0, 19.7)
@@ -307,7 +310,7 @@ def build(keys: list[Key], out):
     )
 
     # ROW2 crosses ROW1's bus at an F.Cu gap between two column lanes.
-    row2_pad = (FFC_X0 + 16, 4.2)
+    row2_pad = (FFC_X0 + 16, 3.2)
     row2_launch = (row2_pad[0], 6.2)
     row2_approach = (209.55, 19.0)
     row2_drop = (210.0, 19.7)
@@ -338,7 +341,7 @@ def build(keys: list[Key], out):
     )
 
     # ROW3 uses the next set of staggered gaps and two short F.Cu bus jumps.
-    row3_pad = (FFC_X0 + 17, 4.2)
+    row3_pad = (FFC_X0 + 17, 3.2)
     row3_launch = (row3_pad[0], 5.575)
     row3_approach = (228.6, 19.0)
     row3_drop = (229.0, 19.7)
@@ -383,7 +386,7 @@ def build(keys: list[Key], out):
 
     # ROW4 leaves the connector directly through the centre switch gap.  This
     # avoids adding a fifth trace to the already full rear-edge F.Cu fan.
-    row4_pad = (FFC_X0 + 18, 4.2)
+    row4_pad = (FFC_X0 + 18, 3.2)
     row4_entry = (row4_pad[0], 15.8)
     board.segment("ROW4", row4_pad, row4_entry, "B.Cu", fan_width)
     board.via("ROW4", row4_entry, 0.6, 0.3)
